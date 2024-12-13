@@ -82,8 +82,10 @@ class BaseTelegramService implements TelegramServiceInterface
         return $message . $contacts;
     }
 
-    public function handleBusinessMessage(Update|array $response): void 
+    public function handleBusinessMessage(Update|array $response, string $adminChatId): void 
     {
+        $message = $this->getText($response);
+        $this->sendResponse($adminChatId, $message);
     }
 
     public function handlePersonalMessage(Update|array $response, array $params): void 
@@ -93,8 +95,10 @@ class BaseTelegramService implements TelegramServiceInterface
         $this->sendResponse($chatId, $message);
     }
 
-    public function handleGrouplMessage(Update|array $response): void  
+    public function handleGrouplMessage(Update|array $response, string $adminChatId): void  
     {
+        $message = $this->getText($response);
+        $this->sendResponse($adminChatId, $message);
     }
 
     public function isGroupMessage(Update|array $response): ?bool
@@ -225,5 +229,10 @@ class BaseTelegramService implements TelegramServiceInterface
             'chat_id' => "$chatId",
             'text' => "$message",
         ]);
+    }
+
+    public function getAdminChatId(): string
+    {
+        return env('TELEGRAM_APPEAL_GROUP_ID');
     }
 }

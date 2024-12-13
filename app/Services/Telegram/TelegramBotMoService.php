@@ -11,13 +11,15 @@ class TelegramBotMoService extends BaseTelegramService
     public function handleWebhook(Request $request): void
     {
         $response = Telegram::bot('botMo')->getWebhookUpdates();
+        $adminChatId = $this->getAdminChatId();
+
         if ($this->isBusinessMessage($response)) {
-            $this->handleBusinessMessage($response);
+            $this->handleBusinessMessage($response, $adminChatId);
         } else {
             if ($this->isPrivate($this->getChatType($response))) {
                 $this->handlePersonalMessage($response, []);
             } else {
-                $this->handleGrouplMessage($response);
+                $this->handleGrouplMessage($response, $adminChatId);
             }
         }
     }
