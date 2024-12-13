@@ -2,6 +2,7 @@
 
 namespace App\DTO;
 
+use App\Models\IgnoreList;
 use App\Interfaces\DTOInterface;
 use Illuminate\Support\Facades\Validator;
 
@@ -32,6 +33,13 @@ class IgnoreListDTO implements DTOInterface
         return [
             'tg_id' => $this->tgId,
         ];
+    }
+
+    public function fromModel(IgnoreList $client): self
+    {
+        return new self(
+            $client->tg_id,
+        );
     }
 }
 

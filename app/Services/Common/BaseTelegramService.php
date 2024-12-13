@@ -13,6 +13,18 @@ use App\Interfaces\TelegramServiceInterface;
 
 class BaseTelegramService implements TelegramServiceInterface
 {
+    //TODO:implement ID loading from the ignore list 
+    const ADMINS = [
+        '6899147031',
+        '6256784114',
+        '6960195534',
+        '395590080',
+        '344590941',
+        '615007058',
+        '774982582',
+        '5000707181',
+    ];
+
     public Client $client;
     public BaseAppealService $baseAppealService;
     public BaseClientService $baseClientService;
@@ -96,6 +108,10 @@ class BaseTelegramService implements TelegramServiceInterface
         }
 
         $tgId = $this->getUserId($response);
+        if ($this->isIgnored($tgId)) {
+            return null;
+        }
+
         $chat = $this->getChatName($response);
         $clientData = $this->baseClientService->getClientByTgId($tgId);
 
@@ -150,11 +166,16 @@ class BaseTelegramService implements TelegramServiceInterface
             return null;
         }
 
+        $tgId = $this->getUserId($response);
+        if ($this->isIgnored($tgId)) {
+            return null;
+        }
+
         $text = $this->getText($response);
         $chat = $this->getChatName($response);
         $nick = $this->getUsername($response);
         $username = $this->getUserFullName($response);
-        $tgId = $this->getUserId($response);
+
         $clientData = $this->baseClientService->getClientByTgId($tgId);
 
         if ($clientData) {
@@ -318,9 +339,9 @@ class BaseTelegramService implements TelegramServiceInterface
     public function sendResponse(string $chatId, string $message, string $botName): void
     {
         try {
-            if (Telegram::getChat(['chat_id' => '395590080'])) {
+            if (Telegram::getChat(['chat_id' => $chatId])) {
                 Telegram::bot($botName)->sendMessage([
-                    'chat_id' => "395590080",
+                    'chat_id' => $chatId,
                     'text' => "$message",
                 ]);
             }
@@ -359,9 +380,19 @@ class BaseTelegramService implements TelegramServiceInterface
 
         return null;
     }
+
     public function isMessage(Update|array $response): bool
     {
         if ($this->getMessage($response)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function isIgnored(int|string $id): bool
+    {
+        if (in_array($id, self::ADMINS)) {
             return true;
         }
 
