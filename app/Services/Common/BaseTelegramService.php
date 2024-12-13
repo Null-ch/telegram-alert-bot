@@ -316,7 +316,7 @@ class BaseTelegramService implements TelegramServiceInterface
     public function getText(Update|array $response): ?string
     {
         if ($message = $this->getMessage($response)) {
-            return $message['text'];
+            return isset($message['text']) ? $message['text'] : null;
         }
 
         return null;
