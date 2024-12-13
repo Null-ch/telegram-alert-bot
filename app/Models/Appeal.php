@@ -16,11 +16,15 @@ class Appeal extends Model
      */
     protected $fillable = [
         'text',
-        'chat_type',
+        'group_name',
         'client_id',
         'message_id',
     ];
 
     protected $table = 'appeals';
     protected $guarded = false;
+    public function scopeActive($query)
+    {
+        return $query->whereNull('deleted_at');
+    }
 }

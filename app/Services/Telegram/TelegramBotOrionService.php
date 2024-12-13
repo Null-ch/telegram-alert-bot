@@ -14,13 +14,20 @@ class TelegramBotOrionService extends BaseTelegramService
         $adminChatId = $this->getAdminChatId();
 
         if ($this->isBusinessMessage($response)) {
-            $this->handleBusinessMessage($response, $adminChatId);
+            $message = $this->handleBusinessMessage($response, '@HelpdeskOrionTerminal');
         } else {
             if ($this->isPrivate($this->getChatType($response))) {
-                $this->handlePersonalMessage($response, []);
+                $message = $this->handlePersonalMessage([
+                    'accountName' => 'HelpDesk Orion-Terminal',
+                    'accountTag' => '@HelpdeskOrionTerminal',
+                ]);
             } else {
-                $this->handleGrouplMessage($response, $adminChatId);
+                $message = $this->handleGrouplMessage($response, '@HelpdeskOrionTerminal');
             }
+        }
+
+        if ($message) {
+            $this->sendResponse($adminChatId, $message, 'botOrion');
         }
     }
 }

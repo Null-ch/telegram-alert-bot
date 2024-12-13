@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Channel extends Model
+class IgnoreList extends Model
 {
     use HasFactory, SoftDeletes;
     /**
@@ -15,9 +15,9 @@ class Channel extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'title',
+        'tg_id',
     ];
 
-    protected $table = 'channels';
+    protected $table = 'ignore_lists';
     protected $guarded = false;
 }

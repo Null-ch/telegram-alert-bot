@@ -14,13 +14,20 @@ class TelegramBotMoService extends BaseTelegramService
         $adminChatId = $this->getAdminChatId();
 
         if ($this->isBusinessMessage($response)) {
-            $this->handleBusinessMessage($response, $adminChatId);
+            $message = $this->handleBusinessMessage($response, '@HelpDesk_MO');
         } else {
             if ($this->isPrivate($this->getChatType($response))) {
-                $this->handlePersonalMessage($response, []);
+                $message = $this->handlePersonalMessage([
+                    'accountName' => 'Helpdesk Terminal МО',
+                    'accountTag' => '@HelpDesk_MO',
+                ]);
             } else {
-                $this->handleGrouplMessage($response, $adminChatId);
+                $message = $this->handleGrouplMessage($response, '@HelpDesk_MO');
             }
+        }
+
+        if ($message) {
+            $this->sendResponse($adminChatId, $message, 'botMo');
         }
     }
 }

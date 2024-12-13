@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('full_name');
             $table->string('tg_id');
-            $table->unsignedBigInteger('channel_id');
             $table->timestamps();
             $table->softDeletes();
         });

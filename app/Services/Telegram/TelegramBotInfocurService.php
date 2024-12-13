@@ -14,13 +14,20 @@ class TelegramBotInfocurService extends BaseTelegramService
         $adminChatId = $this->getAdminChatId();
 
         if ($this->isBusinessMessage($response)) {
-            $this->handleBusinessMessage($response, $adminChatId);
+            $message = $this->handleBusinessMessage($response, '@HelpdeskTerminal');
         } else {
             if ($this->isPrivate($this->getChatType($response))) {
-                $this->handlePersonalMessage($response, []);
+                $message = $this->handlePersonalMessage([
+                    'accountName' => 'Техподдержка ИнфоЦУР',
+                    'accountTag' => '@HelpdeskTerminal',
+                ]);
             } else {
-                $this->handleGrouplMessage($response, $adminChatId);
+                $message = $this->handleGrouplMessage($response, '@HelpdeskTerminal');
             }
+        }
+
+        if ($message) {
+            $this->sendResponse($adminChatId, $message, 'botInfocur');
         }
     }
 }

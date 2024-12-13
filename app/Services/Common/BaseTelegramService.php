@@ -3,6 +3,7 @@
 namespace App\Services\Common;
 
 use GuzzleHttp\Client;
+use App\Enums\ChatType;
 use App\DTO\ApiResponseDTO;
 use Illuminate\Support\Arr;
 use Telegram\Bot\Objects\Update;
@@ -13,9 +14,15 @@ use App\Interfaces\TelegramServiceInterface;
 class BaseTelegramService implements TelegramServiceInterface
 {
     public Client $client;
-    public function __construct()
-    {
+    public BaseAppealService $baseAppealService;
+    public BaseClientService $baseClientService;
+    public function __construct(
+        BaseAppealService $baseAppealService,
+        BaseClientService $baseClientService,
+    ) {
         $this->client = new Client;
+        $this->baseAppealService = $baseAppealService;
+        $this->baseClientService = $baseClientService;
     }
 
     public function setWebhook(string $prefix): ApiResponseDTO
@@ -33,11 +40,11 @@ class BaseTelegramService implements TelegramServiceInterface
         $response = $this->client->request('GET', $telegramApiUrl);
         return $this->responseProcessing($response);
     }
-    private function getToken(string $prefix): string
+    public function getToken(string $prefix): string
     {
         return env('TELEGRAM_' . strtoupper($prefix) . '_BOT_TOKEN');
     }
-    private function getTelegramApiUrl(string $token, string $type): ?string
+    public function getTelegramApiUrl(string $token, string $type): ?string
     {
         if ($type == 'set') {
             return 'https://api.telegram.org/bot' . $token . '/setWebhook?url=';
@@ -48,11 +55,11 @@ class BaseTelegramService implements TelegramServiceInterface
 
         return null;
     }
-    private function getWebhookUrl(string $prefix): string
+    public function getWebhookUrl(string $prefix): string
     {
         return route('telegram_webhook', ['prefix' => $prefix]);
     }
-    private function responseProcessing(ResponseInterface $response): ApiResponseDTO
+    public function responseProcessing(ResponseInterface $response): ApiResponseDTO
     {
         $statusCode = $response->getStatusCode();
         $body = json_decode($response->getBody(), true);
@@ -63,7 +70,7 @@ class BaseTelegramService implements TelegramServiceInterface
             return new ApiResponseDTO($statusCode, false, $body, $errorMessage);
         }
     }
-    private function getErrorMessage(int $statusCode): string
+    public function getErrorMessage(int $statusCode): string
     {
         return match ($statusCode) {
             400 => 'Bad Request: Invalid input.',
@@ -74,31 +81,116 @@ class BaseTelegramService implements TelegramServiceInterface
     }
     public function getDefaultCallback(array $params): string
     {
-        $channel = Arr::get($params, 'channel');
         $accountName = Arr::get($params, 'accountName');
         $accountTag = Arr::get($params, 'accountTag');
-        $message = "Приветствую!\nЯ обычный бот и не могу Вам ответить. Если у Вас есть какие-либо вопросы - обратитесь в официальный аккаунт технической поддержки " . $channel . "\n";
-        $contacts = "Аккаунт технической поддержки:\n" . "{$accountName}: {$accountTag}";
+        $message = "Приветствую!\nЯ обычный бот и не могу Вам ответить. Если у Вас есть какие-либо вопросы - обратитесь в официальный аккаунт технической поддержки\n";
+        $contacts = "Контакт технической поддержки:\n" . "{$accountName}: {$accountTag}";
         return $message . $contacts;
     }
 
-    public function handleBusinessMessage(Update|array $response, string $adminChatId): void 
+    public function handleBusinessMessage(Update|array $response, string $currentAccount): ?string
     {
-        $message = $this->getText($response);
-        $this->sendResponse($adminChatId, $message);
+        $isMessage = $this->isMessage($response);
+        if (!$isMessage) {
+            return null;
+        }
+
+        $tgId = $this->getUserId($response);
+        $chat = $this->getChatName($response);
+        $clientData = $this->baseClientService->getClientByTgId($tgId);
+
+        if ($clientData) {
+            $isExpiredTimeout = $this->baseAppealService->isExpiredTimeout(
+                $clientData->getClientId(),
+                $currentAccount,
+                $chat
+            );
+            if (!$isExpiredTimeout) {
+                return null;
+            }
+        }
+
+        $text = $this->getText($response);
+        $nick = $this->getUsername($response);
+        $username = $this->getUserFullName($response);
+        $forwardedMessage = $this->generateForwardedMessage([
+            'currentAccount' => $currentAccount,
+            'text' => $text,
+            'chat' => $chat,
+            'nick' => $nick,
+            'username' => $username,
+        ]);
+
+        $newClientData = $this->baseClientService->createClient([
+            'fullName' => $username,
+            'tgId' => $tgId,
+        ]);
+
+        $this->baseAppealService->createAppeal([
+            'text' => $text,
+            'chat' => $chat ? $chat : ChatType::private->value,
+            'channelType' => $currentAccount,
+            'clientId' => $newClientData->getClientId(),
+            'messageId' => $this->getMessageId($response),
+        ]);
+
+        return $forwardedMessage;
     }
 
-    public function handlePersonalMessage(Update|array $response, array $params): void 
+    public function handlePersonalMessage(array $params): string
     {
-        $chatId = $this->getChatId($response);
         $message = $this->getDefaultCallback($params);
-        $this->sendResponse($chatId, $message);
+        return $message;
     }
 
-    public function handleGrouplMessage(Update|array $response, string $adminChatId): void  
+    public function handleGrouplMessage(Update|array $response, string $currentAccount): ?string
     {
-        $message = $this->getText($response);
-        $this->sendResponse($adminChatId, $message);
+        $isMessage = $this->isMessage($response);
+        if (!$isMessage) {
+            return null;
+        }
+
+        $text = $this->getText($response);
+        $chat = $this->getChatName($response);
+        $nick = $this->getUsername($response);
+        $username = $this->getUserFullName($response);
+        $tgId = $this->getUserId($response);
+        $clientData = $this->baseClientService->getClientByTgId($tgId);
+
+        if ($clientData) {
+            $isExpiredTimeout = $this->baseAppealService->isExpiredTimeout(
+                $clientData->getClientId(),
+                $currentAccount,
+                $chat
+            );
+            if (!$isExpiredTimeout) {
+                return null;
+            }
+        }
+
+        $message = $this->generateForwardedMessage([
+            'currentAccount' => $currentAccount,
+            'text' => $text,
+            'chat' => $chat,
+            'nick' => $nick,
+            'username' => $username,
+        ]);
+
+        $newClientData = $this->baseClientService->createClient([
+            'fullName' => $username,
+            'tgId' => $this->getUserId($response),
+            'channelType' => $currentAccount,
+        ]);
+
+        $this->baseAppealService->createAppeal([
+            'text' => $text,
+            'chat' => $chat ? $chat : ChatType::private->value,
+            'channelType' => $currentAccount,
+            'clientId' => $newClientData->getClientId(),
+            'messageId' => $this->getMessageId($response),
+        ]);
+
+        return $message;
     }
 
     public function isGroupMessage(Update|array $response): ?bool
@@ -110,10 +202,10 @@ class BaseTelegramService implements TelegramServiceInterface
         return false;
     }
 
-    public function getGroupName(Update|array $response): ?string
+    public function getChatName(Update|array $response): ?string
     {
         if ($chatData = $this->getChatData($response)) {
-            return $chatData['title'];
+            return isset($chatData['title']) ? $chatData['title'] : null;
         }
 
         return null;
@@ -149,7 +241,7 @@ class BaseTelegramService implements TelegramServiceInterface
 
     public function getChatId(Update|array $response): ?string
     {
-        if ($chatData = $this->getChatData($response)) {
+        if ($chatData = $this->getFromData($response)) {
             return $chatData['id'];
         }
 
@@ -218,21 +310,61 @@ class BaseTelegramService implements TelegramServiceInterface
         return null;
     }
 
-    public function isPrivate(string $type): bool
+    public function isPrivate(?string $type): bool
     {
-        return $type == 'private' ? true : false;
+        return $type == 'private';
     }
 
-    public function sendResponse(string $chatId, string $message): void
+    public function sendResponse(string $chatId, string $message, string $botName): void
     {
-        Telegram::sendMessage([
-            'chat_id' => "$chatId",
-            'text' => "$message",
-        ]);
+        try {
+            if (Telegram::getChat(['chat_id' => '395590080'])) {
+                Telegram::bot($botName)->sendMessage([
+                    'chat_id' => "395590080",
+                    'text' => "$message",
+                ]);
+            }
+        } finally {
+            //
+        }
     }
 
     public function getAdminChatId(): string
     {
         return env('TELEGRAM_APPEAL_GROUP_ID');
+    }
+
+    public function generateForwardedMessage(array $params): string
+    {
+        $currentAccount = Arr::get($params, 'currentAccount');
+        $text = Arr::get($params, 'text');
+        $chat = Arr::get($params, 'chat') ? Arr::get($params, 'chat') : null;
+        $nick = Arr::get($params, 'nick') ? Arr::get($params, 'nick') : null;
+        $username = Arr::get($params, 'username');
+        $accountPart = "Аккаунт: {$currentAccount}\n";
+        $messageBodyPart = "Содержимое сообщения:\n{$text}\n\n";
+        $fromPart = $chat ? "Пришло из: {$chat}\n" : "Пришло из: Личные сообщения\n";
+        $userNickPart = $nick ? "Ник пользователя в ТГ: @{$nick}\n" : "Ник пользователя в ТГ: Неизвестно\n";
+        $usernamePart = "Пользователь: {$username}";
+        $message = $accountPart . $messageBodyPart . $fromPart . $userNickPart . $usernamePart;
+
+        return $message;
+    }
+
+    public function getMessageId(Update|array $response): ?string
+    {
+        if ($message = $this->getMessage($response)) {
+            return $message['message_id'];
+        }
+
+        return null;
+    }
+    public function isMessage(Update|array $response): bool
+    {
+        if ($this->getMessage($response)) {
+            return true;
+        }
+
+        return false;
     }
 }

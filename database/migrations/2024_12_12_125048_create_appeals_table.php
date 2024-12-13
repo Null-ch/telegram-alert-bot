@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('appeals', function (Blueprint $table) {
             $table->id();
             $table->text('text');
-            $table->string('chat_type');
+            $table->string('chat');
             $table->unsignedBigInteger('client_id');
+            $table->string('channel_type');
             $table->unsignedBigInteger('message_id');
             $table->timestamps();
             $table->softDeletes();
