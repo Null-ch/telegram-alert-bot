@@ -14,30 +14,43 @@
                 </div>
                 <div class="app-content"> <!--begin::Container-->
                     <div class="container-fluid"> <!--begin::Row-->
-                        <div class="row">
-                            <div class="col-lg-6">
+                        <div class="row justify-content-center">
+                            <div class="col-lg-16">
                                 <div class="card mb-4">
-                                    <div class="card-header border-0">
-                                        <div class="d-flex justify-content-between">
-                                            <h3 class="card-title">Последние сообщения</h3>
-                                        </div>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="d-flex">
-                                            <p class="d-flex flex-column"> <span class="fw-bold fs-5">820</span> <span>Visitors Over Time</span> </p>
-                                            <p class="ms-auto d-flex flex-column text-end"> <span class="text-success"> <i class="bi bi-arrow-up"></i> 12.5%
-                                                </span> <span class="text-secondary">Since last week</span> </p>
-                                        </div> <!-- /.d-flex -->
-                                        <div class="position-relative mb-4">
-                                            <div id="visitors-chart"></div>
-                                        </div>
-                                        <div class="d-flex flex-row justify-content-end"> <span class="me-2"> <i class="bi bi-square-fill text-primary"></i> This Week
-                                            </span> <span> <i class="bi bi-square-fill text-secondary"></i> Last Week
-                                            </span> </div>
-                                    </div>
+                                    <div class="card-header">
+                                        <h3 class="card-title">Последние сообщения</h3>
+                                    </div> <!-- /.card-header -->
+                                    <div class="card-body p-0">
+                                        <table class="table table-bordered" style="table-layout: fixed;">
+                                          <thead>
+                                            <tr>
+                                              <th style="width: 60%;">Текст</th>
+                                              <th style="width: 20%;">Чат</th>
+                                              <th style="width: 20%;">Источник</th>
+                                            </tr>
+                                          </thead>
+                                          <tbody>
+                                            @foreach ($appeals as $appeal)
+                                            <tr class="align-middle" style="height: 60px;">
+                                              <td style="width: 30%;
+                                                              white-space: nowrap;
+                                                              overflow: hidden;
+                                                              text-overflow: ellipsis;
+
+ 
+                                                              vertical-align: top;">
+                                                {{ $appeal->text }}
+                                              </td>
+                                              <td>{{ $appeal->chat }}</td>
+                                              <td>{{ $appeal->channelType }}</td>
+                                            </tr>
+                                            @endforeach
+                                          </tbody>
+                                        </table>
+                                      </div>
                                 </div>
                             </div>
-                            <div class="col-lg-6">
+                            {{-- <div class="col-lg-6">
                                 <div class="card mb-4">
                                     <div class="card-header border-0">
                                         <div class="d-flex justify-content-between">
@@ -58,7 +71,7 @@
                                             </span> </div>
                                     </div>
                                 </div> <!-- /.card -->
-                            </div> <!-- /.col-md-6 -->
+                            </div> <!-- /.col-md-6 --> --}}
                         </div> <!--end::Row-->
                     </div> <!--end::Container-->
                 </div> <!--end::App Content-->

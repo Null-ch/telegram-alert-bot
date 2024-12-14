@@ -61,4 +61,14 @@ class BaseAppealService implements AppealServiceInterface
             return false;
         }
     }
+    
+    public function getAppeal(int $id): ?AppealDTO
+    {
+        return $this->appealRepository->getAppeal($id);
+    }
+
+    public function getAppeals(int $count, string $sort): ?array
+    {
+        return $this->appealRepository->getAppeals($count, $sort);
+    }
 }
