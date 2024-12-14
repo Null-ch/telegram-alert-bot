@@ -52,6 +52,13 @@ return [
             'commands'            => [
             ],
         ],
+        'test' => [
+            'token'               => env('TELEGRAM_TEST_BOT_TOKEN'),
+            'certificate_path'    => env('TELEGRAM_CERTIFICATE_PATH'),
+            'webhook_url'         => env('TELEGRAM_TEST_WEBHOOK_URL'),
+            'commands'            => [
+            ],
+        ],
     ],
 
     /*

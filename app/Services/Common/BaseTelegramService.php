@@ -315,8 +315,20 @@ class BaseTelegramService implements TelegramServiceInterface
 
     public function getText(Update|array $response): ?string
     {
-        if ($message = $this->getMessage($response)) {
-            return isset($message['text']) ? $message['text'] : null;
+        if (!$message = $this->getMessage($response)) {
+            return null;
+        }
+
+        if (isset($message['text'])) {
+            return $message['text'];
+        }
+
+        if (isset($message['caption'])) {
+            return $message['caption'];
+        }
+
+        if (isset($message['photo'])) {
+            return 'Отправлено изображение без текста';
         }
 
         return null;
