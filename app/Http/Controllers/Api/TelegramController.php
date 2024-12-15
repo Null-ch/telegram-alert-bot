@@ -41,7 +41,7 @@ class TelegramController extends Controller
         return response()->json(['success' => $apiResponse->success, 'error' => $apiResponse->error], $apiResponse->statusCode);
     }
 
-    public function removeWebhook(string $prefix) 
+    public function removeWebhook(string $prefix): JsonResponse 
     {
         $apiResponse = match ($prefix) {
             'mo' => $this->telegramBotMoService->removeWebhook($prefix),
