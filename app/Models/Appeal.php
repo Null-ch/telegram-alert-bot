@@ -27,4 +27,8 @@ class Appeal extends Model
     {
         return $query->whereNull('deleted_at');
     }
+    public function client()
+    {
+        return $this->belongsTo(Client::class, 'client_id', 'id');
+    }
 }
