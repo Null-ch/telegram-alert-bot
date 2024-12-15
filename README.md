@@ -54,8 +54,8 @@
 
 ## Настройка
 
-1.  **Create Environment File:**
-   Copy the example env file to your environment and populate it
+1.  **Создайте файл .env :**
+   Скопируйте из файла-примера
 
     ```bash
     cp .env.example .env
