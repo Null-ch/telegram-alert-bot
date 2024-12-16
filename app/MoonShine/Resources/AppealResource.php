@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\MoonShine\Resources;
 
 use App\Models\Appeal;
-use App\Models\Client;
 use MoonShine\UI\Fields\ID;
 use MoonShine\Support\ListOf;
+use MoonShine\UI\Fields\Date;
 use MoonShine\UI\Fields\Text;
 use MoonShine\Laravel\Pages\Page;
 use MoonShine\Laravel\Enums\Action;
@@ -56,12 +56,20 @@ class AppealResource extends ModelResource
             ID::make()->sortable(),
             Text::make(__('Содержимое'), 'text'),
             Text::make(__('Пользователь'), 'client_id', static fn (Appeal $appeal) => $appeal->client->full_name),
+            Text::make(__('Дата'), 'created_at'),
         ];
     }
 
     protected function detailFields(): iterable
     {
         return $this->indexFields();
+    }
+
+    public function filters(): array
+    {
+        return [
+            Date::make('Дата обращения', 'created_at'),
+        ];
     }
 
     protected function activeActions(): ListOf
