@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace App\MoonShine\Resources;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Models\IgnoreList;
 use App\MoonShine\Pages\IgnoreList\IgnoreListIndexPage;
 use App\MoonShine\Pages\IgnoreList\IgnoreListFormPage;
 use App\MoonShine\Pages\IgnoreList\IgnoreListDetailPage;
-
 use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\Laravel\Pages\Page;
 use MoonShine\UI\Fields\ID;

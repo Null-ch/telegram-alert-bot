@@ -4,15 +4,12 @@ declare(strict_types=1);
 
 namespace App\MoonShine\Resources;
 
-use App\Models\Appeal;
 use App\Models\Client;
 use MoonShine\UI\Fields\ID;
 use MoonShine\Support\ListOf;
 use MoonShine\UI\Fields\Text;
-
 use MoonShine\Laravel\Pages\Page;
 use MoonShine\Laravel\Enums\Action;
-use Illuminate\Database\Eloquent\Model;
 use App\MoonShine\Pages\Client\ClientFormPage;
 use MoonShine\Laravel\Resources\ModelResource;
 use App\MoonShine\Pages\Client\ClientIndexPage;
@@ -36,6 +33,7 @@ class ClientResource extends ModelResource
     {
         return [
             ClientIndexPage::class,
+            ClientFormPage::class,
             ClientDetailPage::class,
         ];
     }
@@ -59,10 +57,14 @@ class ClientResource extends ModelResource
     {
         return $this->indexFields();
     }
+    protected function formFields(): iterable
+    {
+        return $this->indexFields();
+    }
 
     protected function activeActions(): ListOf
     {
-        return parent::activeActions()->except(Action::DELETE);
+        return parent::activeActions()->except(Action::DELETE)->except(Action::CREATE);
     }
     /**
      * @param Client $item
