@@ -7,9 +7,9 @@ namespace App\MoonShine\Resources;
 use App\Models\Appeal;
 use MoonShine\UI\Fields\ID;
 use MoonShine\Support\ListOf;
-use MoonShine\UI\Fields\Date;
 use MoonShine\UI\Fields\Text;
 use MoonShine\Laravel\Pages\Page;
+use MoonShine\UI\Fields\DateRange;
 use MoonShine\Laravel\Enums\Action;
 use App\MoonShine\Pages\Appeal\AppealFormPage;
 use MoonShine\Laravel\Resources\ModelResource;
@@ -29,7 +29,9 @@ class AppealResource extends ModelResource
     protected array $with = ['client'];
     protected bool $createInModal = false;
     protected bool $editInModal = false;
-    protected bool $showInModal = true; 
+    protected bool $showInModal = true;
+    protected bool $paginate = true;
+    protected int $itemsPerPage = 10;
     protected bool $simplePaginate = true;
 
     /**
@@ -43,19 +45,21 @@ class AppealResource extends ModelResource
             AppealDetailPage::class,
         ];
     }
-    public function metrics(): array 
+
+    public function metrics(): array
     {
         return [
             ValueMetric::make('Всего обращений')
                 ->value(Appeal::count())
         ];
-    } 
+    }
+
     protected function indexFields(): iterable
     {
         return [
             ID::make()->sortable(),
             Text::make(__('Содержимое'), 'text'),
-            Text::make(__('Пользователь'), 'client_id', static fn (Appeal $appeal) => $appeal->client->full_name),
+            Text::make(__('Пользователь'), 'client_id', static fn(Appeal $appeal) => $appeal->client->full_name),
             Text::make(__('Дата'), 'created_at'),
         ];
     }
@@ -68,7 +72,7 @@ class AppealResource extends ModelResource
     public function filters(): array
     {
         return [
-            Date::make('Дата обращения', 'created_at'),
+            DateRange::make('Дата обращения', 'created_at'),
         ];
     }
 

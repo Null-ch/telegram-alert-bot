@@ -13,28 +13,19 @@ use App\Interfaces\TelegramServiceInterface;
 
 class BaseTelegramService implements TelegramServiceInterface
 {
-    //TODO:implement ID loading from the ignore list 
-    const ADMINS = [
-        '6899147031',
-        '6256784114',
-        '6960195534',
-        '395590080',
-        '344590941',
-        '615007058',
-        '774982582',
-        '5000707181',
-    ];
-
     public Client $client;
     public BaseAppealService $baseAppealService;
     public BaseClientService $baseClientService;
+    public BaseIgnoreListService $baseIgnoreListService;
     public function __construct(
         BaseAppealService $baseAppealService,
         BaseClientService $baseClientService,
+        BaseIgnoreListService $baseIgnoreListService,
     ) {
         $this->client = new Client;
         $this->baseAppealService = $baseAppealService;
         $this->baseClientService = $baseClientService;
+        $this->baseIgnoreListService = $baseIgnoreListService;
     }
 
     public function setWebhook(string $prefix): ApiResponseDTO
@@ -404,7 +395,7 @@ class BaseTelegramService implements TelegramServiceInterface
 
     public function isIgnored(int|string $id): bool
     {
-        if (in_array($id, self::ADMINS)) {
+        if ($this->baseIgnoreListService->getIgnoredByTgId($id)) {
             return true;
         }
 

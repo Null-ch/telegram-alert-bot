@@ -4,8 +4,9 @@ namespace App\Repositories;
 
 use App\DTO\IgnoreListDTO;
 use App\Models\IgnoreList;
+use App\Interfaces\IgnoreListRepositoryInterface;
 
-class IgnoreListRepository
+class IgnoreListRepository implements IgnoreListRepositoryInterface
 {
     public IgnoreList $ignoreList;
 
@@ -22,5 +23,17 @@ class IgnoreListRepository
         ]);
 
         return $dto->fromModel($ignoreList);
+    }
+
+    public function getIgnoredByTgId(int $tgId): ?IgnoreListDTO
+    {
+        $ignoredtgId = IgnoreList::where('tg_id', $tgId)->first();
+        if ($ignoredtgId) {
+            return new IgnoreListDTO(
+                $ignoredtgId->tg_id,
+            );
+        }
+
+        return null;
     }
 }

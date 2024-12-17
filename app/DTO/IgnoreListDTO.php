@@ -27,7 +27,6 @@ class IgnoreListDTO implements DTOInterface
         return $validator->passes();
     }
 
-
     public function toArray(): array
     {
         return [

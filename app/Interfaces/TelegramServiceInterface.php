@@ -9,12 +9,19 @@ use Psr\Http\Message\ResponseInterface;
 interface TelegramServiceInterface
 {
     public function setWebhook(string $prefix): ApiResponseDTO;
+
     public function removeWebhook(string $prefix): ApiResponseDTO;
+
     public function getToken(string $prefix): string;
+
     public function getTelegramApiUrl(string $token, string $type): ?string;
+
     public function getWebhookUrl(string $prefix): string;
+
     public function responseProcessing(ResponseInterface $response): ApiResponseDTO;
+
     public function getErrorMessage(int $statusCode): string;
+
     public function getDefaultCallback(array $params): string;
 
     public function handleBusinessMessage(Update|array $response, string $currentAccount): ?string;
@@ -52,4 +59,9 @@ interface TelegramServiceInterface
     public function getAdminChatId(): string;
 
     public function generateForwardedMessage(array $params): string;
+    public function getMessageId(Update|array $response): ?string;
+
+    public function isMessage(Update|array $response): bool;
+
+    public function isIgnored(int|string $id): bool;
 }
