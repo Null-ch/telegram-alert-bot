@@ -36,6 +36,7 @@ class BaseTelegramService implements TelegramServiceInterface
         $response = $this->client->request('GET', $telegramApiUrl . $webhookUrl);
         return $this->responseProcessing($response);
     }
+
     public function removeWebhook(string $prefix): ApiResponseDTO
     {
         $token = $this->getToken($prefix);
@@ -43,10 +44,12 @@ class BaseTelegramService implements TelegramServiceInterface
         $response = $this->client->request('GET', $telegramApiUrl);
         return $this->responseProcessing($response);
     }
+
     public function getToken(string $prefix): string
     {
         return env('TELEGRAM_' . strtoupper($prefix) . '_BOT_TOKEN');
     }
+
     public function getTelegramApiUrl(string $token, string $type): ?string
     {
         if ($type == 'set') {
@@ -58,10 +61,12 @@ class BaseTelegramService implements TelegramServiceInterface
 
         return null;
     }
+
     public function getWebhookUrl(string $prefix): string
     {
         return route('telegram_webhook', ['prefix' => $prefix]);
     }
+
     public function responseProcessing(ResponseInterface $response): ApiResponseDTO
     {
         $statusCode = $response->getStatusCode();
@@ -73,6 +78,7 @@ class BaseTelegramService implements TelegramServiceInterface
             return new ApiResponseDTO($statusCode, false, $body, $errorMessage);
         }
     }
+
     public function getErrorMessage(int $statusCode): string
     {
         return match ($statusCode) {
@@ -82,6 +88,7 @@ class BaseTelegramService implements TelegramServiceInterface
             default => "API request failed with status code {$statusCode}",
         };
     }
+
     public function getDefaultCallback(array $params): string
     {
         $accountName = Arr::get($params, 'accountName');

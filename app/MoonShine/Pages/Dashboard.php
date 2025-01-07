@@ -36,7 +36,7 @@ class Dashboard extends Page
         return [
             ValueMetric::make('Всего обращений')
                 ->value(Appeal::count()),
-            LineChartMetric::make('Appeals')
+            LineChartMetric::make('Обращения')
                 ->line([
                     'Обращения' => Appeal::query()
                         ->selectRaw('DATE_FORMAT(created_at, "%d.%m.%Y") as date, COUNT(*) as count')

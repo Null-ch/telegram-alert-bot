@@ -10,26 +10,31 @@ class TelegramBotTestService extends BaseTelegramService
 {
     public function handleWebhook(Request $request): void
     {
-        $response = Telegram::bot('test')->getWebhookUpdates();
-        $currentChatId = $this->getAdminChatId();
+        try {
+            $response = Telegram::bot('test')->getWebhookUpdates();
+            $currentChatId = env('TELEGRAM_ERROR_ALERT_CHAT_ID');
 
-        if ($this->isBusinessMessage($response)) {
-            $message = $this->handleBusinessMessage($response, 'Тег тестового аккаунта');
-        } else {
-            if ($this->isPrivate($this->getChatType($response))) {
-                $message = $this->handlePersonalMessage([
-                    'accountName' => 'Тестовый аккаунт',
-                    'accountTag' => 'Тег тестового аккаунта',
-                ]);
-                $currentChatId = $this->getChatId($response);
+            if ($this->isBusinessMessage($response)) {
+                $message = $this->handleBusinessMessage($response, 'Тег тестового аккаунта');
             } else {
-                $message = json_encode($response);
-                $message = $this->handleGrouplMessage($response, 'Тег тестового аккаунта');
+                if ($this->isPrivate($this->getChatType($response))) {
+                    $message = $this->handlePersonalMessage([
+                        'accountName' => 'Тестовый аккаунт',
+                        'accountTag' => 'Тег тестового аккаунта',
+                    ]);
+                    $currentChatId = $this->getChatId($response);
+                } else {
+                    $message = $this->handleGrouplMessage($response, 'Тег тестового аккаунта');
+                }
             }
-        }
 
-        if ($message) {
-            $this->sendResponse($currentChatId, $message, 'test');
+            if ($message) {
+                $this->sendResponse($currentChatId, env('TELEGRAM_APPEAL_GROUP_ID'), 'test');
+            }
+        } catch (\Exception $e) {
+            $error = $e->getMessage();
+            $errorMessage = "Ошибка: $error\n";
+            $this->sendResponse(env('TELEGRAM_ERROR_ALERT_CHAT_ID'), $errorMessage, 'test');
         }
     }
 }
