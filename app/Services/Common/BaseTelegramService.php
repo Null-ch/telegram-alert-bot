@@ -127,28 +127,31 @@ class BaseTelegramService implements TelegramServiceInterface
         $text = $this->getText($response);
         $nick = $this->getUsername($response);
         $username = $this->getUserFullName($response);
-        $forwardedMessage = $this->generateForwardedMessage([
-            'currentAccount' => $currentAccount,
-            'text' => $text,
-            'chat' => $chat,
-            'nick' => $nick,
-            'username' => $username,
-        ]);
+        if ($text) {
+            $forwardedMessage = $this->generateForwardedMessage([
+                'currentAccount' => $currentAccount,
+                'text' => $text,
+                'chat' => $chat,
+                'nick' => $nick,
+                'username' => $username,
+            ]);
 
-        $newClientData = $this->baseClientService->createClient([
-            'fullName' => $username,
-            'tgId' => $tgId,
-        ]);
+            $newClientData = $this->baseClientService->createClient([
+                'fullName' => $username,
+                'tgId' => $tgId,
+            ]);
 
-        $this->baseAppealService->createAppeal([
-            'text' => $text,
-            'chat' => $chat ? $chat : ChatType::private->value,
-            'channelType' => $currentAccount,
-            'clientId' => $newClientData->getClientId(),
-            'messageId' => $this->getMessageId($response),
-        ]);
+            $this->baseAppealService->createAppeal([
+                'text' => $text,
+                'chat' => $chat ? $chat : ChatType::private->value,
+                'channelType' => $currentAccount,
+                'clientId' => $newClientData->getClientId(),
+                'messageId' => $this->getMessageId($response),
+            ]);
+            return $forwardedMessage;
+        }
 
-        return $forwardedMessage;
+        return null;
     }
 
     public function handlePersonalMessage(array $params): string
@@ -169,47 +172,50 @@ class BaseTelegramService implements TelegramServiceInterface
             return null;
         }
 
-        $text = $this->getText($response);
-        $chat = $this->getChatName($response);
-        $nick = $this->getUsername($response);
-        $username = $this->getUserFullName($response);
+        if ($text = $this->getText($response)) {
+            $chat = $this->getChatName($response);
+            $nick = $this->getUsername($response);
+            $username = $this->getUserFullName($response);
 
-        $clientData = $this->baseClientService->getClientByTgId($tgId);
+            $clientData = $this->baseClientService->getClientByTgId($tgId);
 
-        if ($clientData) {
-            $isExpiredTimeout = $this->baseAppealService->isExpiredTimeout(
-                $clientData->getClientId(),
-                $currentAccount,
-                $chat
-            );
-            if (!$isExpiredTimeout) {
-                return null;
+            if ($clientData) {
+                $isExpiredTimeout = $this->baseAppealService->isExpiredTimeout(
+                    $clientData->getClientId(),
+                    $currentAccount,
+                    $chat
+                );
+                if (!$isExpiredTimeout) {
+                    return null;
+                }
             }
+
+            $message = $this->generateForwardedMessage([
+                'currentAccount' => $currentAccount,
+                'text' => $text,
+                'chat' => $chat,
+                'nick' => $nick,
+                'username' => $username,
+            ]);
+
+            $newClientData = $this->baseClientService->createClient([
+                'fullName' => $username,
+                'tgId' => $this->getUserId($response),
+                'channelType' => $currentAccount,
+            ]);
+
+            $this->baseAppealService->createAppeal([
+                'text' => $text,
+                'chat' => $chat ? $chat : ChatType::private->value,
+                'channelType' => $currentAccount,
+                'clientId' => $newClientData->getClientId(),
+                'messageId' => $this->getMessageId($response),
+            ]);
+
+            return $message;
         }
 
-        $message = $this->generateForwardedMessage([
-            'currentAccount' => $currentAccount,
-            'text' => $text,
-            'chat' => $chat,
-            'nick' => $nick,
-            'username' => $username,
-        ]);
-
-        $newClientData = $this->baseClientService->createClient([
-            'fullName' => $username,
-            'tgId' => $this->getUserId($response),
-            'channelType' => $currentAccount,
-        ]);
-
-        $this->baseAppealService->createAppeal([
-            'text' => $text,
-            'chat' => $chat ? $chat : ChatType::private->value,
-            'channelType' => $currentAccount,
-            'clientId' => $newClientData->getClientId(),
-            'messageId' => $this->getMessageId($response),
-        ]);
-
-        return $message;
+        return null;
     }
 
     public function isGroupMessage(Update|array $response): ?bool
