@@ -14,6 +14,7 @@
         "laravel/tinker": "^2.9",
         "laravel/ui": "^4.6",
         "moonshine/apexcharts": "^1.0",
+        "moonshine/import-export": "^1.0",
         "moonshine/moonshine": "^3.0",
         "symfony/polyfill-mbstring": "^1.31"
     },

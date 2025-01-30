@@ -6,10 +6,8 @@ namespace App\MoonShine\Pages\Appeal;
 
 use Throwable;
 use MoonShine\Contracts\UI\FieldContract;
-use App\MoonShine\Resources\ClientResource;
 use MoonShine\Laravel\Pages\Crud\IndexPage;
 use MoonShine\Contracts\UI\ComponentContract;
-use MoonShine\Laravel\Fields\Relationships\BelongsTo;
 
 class AppealIndexPage extends IndexPage
 {

@@ -46,7 +46,7 @@ class BaseAppealService implements AppealServiceInterface
             $chat = ChatType::private->value;
         }
 
-        $lastAppeal = $this->appealRepository->getLastAppeal($id, $channelType, $chat);
+        $lastAppeal = $this->appealRepository->getLastAppeal($id);
 
         if (!$lastAppeal) {
             return true;

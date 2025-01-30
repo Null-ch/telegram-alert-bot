@@ -21,11 +21,9 @@ class AppealRepository implements AppealRepositoryInterface
         return $dto->fromModel($appeal);
     }
 
-    public function getLastAppeal(int|string $id, string $channelType, string $chat): ?Appeal
+    public function getLastAppeal(int|string $id): ?Appeal
     {
         $lastApeeal = Appeal::active()->where('client_id', $id)
-            ->where('channel_type', $channelType)
-            ->where('chat', $chat)
             ->orderBy('created_at', 'desc')
             ->first();
         if ($lastApeeal) {
