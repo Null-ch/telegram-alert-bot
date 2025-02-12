@@ -14,6 +14,9 @@ use MoonShine\Contracts\Core\DependencyInjection\ConfiguratorContract;
 use App\MoonShine\Resources\AppealResource;
 use App\MoonShine\Resources\IgnoreListResource;
 use App\MoonShine\Resources\ClientResource;
+use App\MoonShine\Resources\GroupChatResource;
+use App\MoonShine\Resources\MailingResource;
+use App\MoonShine\Pages\MailingPage;
 
 class MoonShineServiceProvider extends ServiceProvider
 {
@@ -33,9 +36,12 @@ class MoonShineServiceProvider extends ServiceProvider
                 MoonShineUserResource::class,
                 MoonShineUserRoleResource::class,
                 ClientResource::class,
+                GroupChatResource::class,
+                MailingResource::class,
             ])
             ->pages([
                 ...$config->getPages(),
+                MailingPage::class,
             ])
         ;
     }

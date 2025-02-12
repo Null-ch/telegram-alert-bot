@@ -20,4 +20,9 @@ class IgnoreList extends Model
 
     protected $table = 'ignore_lists';
     protected $guarded = false;
+
+    public function scopeNotDeleted($query)
+    {
+        return $query->whereNull('deleted_at');
+    }
 }

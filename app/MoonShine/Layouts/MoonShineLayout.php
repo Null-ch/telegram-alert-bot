@@ -35,7 +35,9 @@ use MoonShine\MenuManager\MenuItem;
 use MoonShine\MenuManager\MenuGroup;
 use App\MoonShine\Resources\IgnoreListResource;
 use App\MoonShine\Resources\ClientResource;
-
+use App\MoonShine\Resources\GroupChatResource;
+use App\MoonShine\Resources\MailingResource;
+use App\MoonShine\Pages\MailingPage;
 final class MoonShineLayout extends AppLayout
 {
     protected function assets(): array
@@ -52,14 +54,20 @@ final class MoonShineLayout extends AppLayout
                 MenuItem::make('Обращения', AppealResource::class),
                 MenuItem::make('Пользователи', ClientResource::class),
                 MenuItem::make('Игнор-лист', IgnoreListResource::class),
+                MenuGroup::make('Рассылки', [
+                    MenuItem::make('Рассылки', MailingResource::class),
+                    MenuItem::make('Групповые чаты', GroupChatResource::class),
+                    MenuItem::make('Создать рассылку', MailingPage::class)
+                ]),
             ]),
             ...parent::menu(),
         ];
     }
+
     protected function getFooterMenu(): array
     {
         return [
-            'https://comp-help.site/admin' => 'Alert-Bot',
+            'https://alert-bot.ru/admin' => 'Alert-Bot',
         ];
     }
  

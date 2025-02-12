@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Appeal extends Model
+class GroupChat extends Model
 {
     use HasFactory, SoftDeletes;
     /**
@@ -15,21 +15,11 @@ class Appeal extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'text',
-        'chat',
+        'account',
+        'title',
         'chat_id',
-        'client_id',
-        'message_id',
     ];
 
-    protected $table = 'appeals';
+    protected $table = 'group_chats';
     protected $guarded = false;
-    public function scopeActive($query)
-    {
-        return $query->whereNull('deleted_at');
-    }
-    public function client()
-    {
-        return $this->belongsTo(Client::class, 'client_id', 'id');
-    }
 }

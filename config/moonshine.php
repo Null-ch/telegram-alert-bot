@@ -1,26 +1,27 @@
 <?php
 
-use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-use Illuminate\Cookie\Middleware\EncryptCookies;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
-use Illuminate\Routing\Middleware\SubstituteBindings;
-use Illuminate\Session\Middleware\AuthenticateSession;
-use Illuminate\Session\Middleware\StartSession;
-use Illuminate\View\Middleware\ShareErrorsFromSession;
-use MoonShine\Laravel\Exceptions\MoonShineNotFoundException;
-use MoonShine\Laravel\Forms\FiltersForm;
+use App\MoonShine\Pages\MailingPage;
 use MoonShine\Laravel\Forms\LoginForm;
-use MoonShine\Laravel\Http\Middleware\Authenticate;
-use MoonShine\Laravel\Http\Middleware\ChangeLocale;
-use MoonShine\Laravel\Layouts\AppLayout;
-use MoonShine\Laravel\Models\MoonshineUser;
 use MoonShine\Laravel\Pages\Dashboard;
 use MoonShine\Laravel\Pages\ErrorPage;
 use MoonShine\Laravel\Pages\LoginPage;
+use MoonShine\Laravel\Forms\FiltersForm;
+use MoonShine\Laravel\Layouts\AppLayout;
 use MoonShine\Laravel\Pages\ProfilePage;
+use MoonShine\Laravel\Models\MoonshineUser;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use MoonShine\Laravel\Http\Middleware\Authenticate;
+use MoonShine\Laravel\Http\Middleware\ChangeLocale;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Session\Middleware\AuthenticateSession;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use MoonShine\Laravel\Exceptions\MoonShineNotFoundException;
 
 return [
-    'title' => env('MOONSHINE_TITLE', 'MoonShine'),
+    'title' => env('MOONSHINE_TITLE', 'Alert-bot'),
     'logo' => 'vendor/moonshine/logo.png',
     'logo_small' => 'vendor/moonshine/logo.png',
 

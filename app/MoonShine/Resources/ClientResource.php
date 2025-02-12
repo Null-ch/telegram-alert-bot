@@ -23,7 +23,7 @@ class ClientResource extends ModelResource
 {
     protected string $model = Client::class;
 
-    protected string $title = 'Clients';
+    protected string $title = 'Пользователи';
     public string $column = 'id';
 
     /**

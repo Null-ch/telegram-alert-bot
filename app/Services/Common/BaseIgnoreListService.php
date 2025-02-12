@@ -4,8 +4,9 @@ namespace App\Services\Common;
 
 use App\DTO\IgnoreListDTO;
 use App\Repositories\IgnoreListRepository;
+use App\Interfaces\IgnoreListServiceInterface;
 
-class BaseIgnoreListService
+class BaseIgnoreListService implements IgnoreListServiceInterface
 {
     public IgnoreListRepository $ignoreListRepository;
     public function __construct(

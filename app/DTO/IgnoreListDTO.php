@@ -34,10 +34,10 @@ class IgnoreListDTO implements DTOInterface
         ];
     }
 
-    public function fromModel(IgnoreList $client): self
+    public function fromModel(IgnoreList $ignoreList): self
     {
         return new self(
-            $client->tg_id,
+            $ignoreList->tg_id,
         );
     }
 }

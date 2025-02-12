@@ -27,6 +27,7 @@ class BaseAppealService implements AppealServiceInterface
             $appealData = new AppealDTO(
                 Arr::get($appealDataArray, 'text'),
                 Arr::get($appealDataArray, 'chat'),
+                Arr::get($appealDataArray, 'chatId'),
                 Arr::get($appealDataArray, 'channelType'),
                 Arr::get($appealDataArray, 'clientId'),
                 Arr::get($appealDataArray, 'messageId'),

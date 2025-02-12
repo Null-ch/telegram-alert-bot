@@ -31,10 +31,13 @@ class TelegramBotOrionService extends BaseTelegramService
             }
 
             if ($message) {
+                $this->handleMessage($response, '@HelpdeskTerminal');
                 $this->sendResponse($currentChatId, $message, 'botOrion');
             }
         } catch (\Exception $e) {
             $error = $e->getMessage();
+            $errorMessage = "Ошибка: $error\n";
+            $this->sendResponse(env('TELEGRAM_ERROR_ALERT_CHAT_ID'), $errorMessage, 'test');
             Log::error('Message: ' . $error, $e->getTrace());
         }
     }

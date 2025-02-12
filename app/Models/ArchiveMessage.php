@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Appeal extends Model
+class ArchiveMessage extends Model
 {
     use HasFactory, SoftDeletes;
     /**
@@ -18,18 +18,16 @@ class Appeal extends Model
         'text',
         'chat',
         'chat_id',
+        'channel_type',
         'client_id',
         'message_id',
     ];
 
-    protected $table = 'appeals';
+    protected $table = 'archive_messages';
     protected $guarded = false;
+
     public function scopeActive($query)
     {
         return $query->whereNull('deleted_at');
-    }
-    public function client()
-    {
-        return $this->belongsTo(Client::class, 'client_id', 'id');
     }
 }

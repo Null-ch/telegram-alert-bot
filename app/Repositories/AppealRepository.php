@@ -13,6 +13,7 @@ class AppealRepository implements AppealRepositoryInterface
         $appeal = new Appeal();
         $appeal->text = $dto->text;
         $appeal->chat = $dto->chat;
+        $appeal->chat_id = $dto->chatId;
         $appeal->channel_type = $dto->channelType;
         $appeal->client_id = $dto->clientId;
         $appeal->message_id = $dto->messageId;
@@ -39,6 +40,7 @@ class AppealRepository implements AppealRepositoryInterface
         $appealDTO = new AppealDTO(
             $appeal->text,
             $appeal->chat,
+            $appeal->chat_id,
             $appeal->channel_type,
             $appeal->client_id,
             $appeal->message_id
@@ -68,6 +70,7 @@ class AppealRepository implements AppealRepositoryInterface
                 $appeals[] = new AppealDTO(
                     $result->text,
                     $result->chat,
+                    $result->chat_id,
                     $result->channel_type,
                     $result->client_id,
                     $result->message_id

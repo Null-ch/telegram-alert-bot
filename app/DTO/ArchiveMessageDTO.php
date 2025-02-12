@@ -2,12 +2,11 @@
 
 namespace App\DTO;
 
-use App\Interfaces\DTOInterface;
-use App\Models\Appeal;
-use Illuminate\Support\Facades\Validator;
+use App\Models\ArchiveMessage;
 
-class AppealDTO implements DTOInterface
+class ArchiveMessageDTO
 {
+    public null|int|string $id;
     public function __construct(
         public string $text,
         public string $chat,
@@ -25,23 +24,6 @@ class AppealDTO implements DTOInterface
         $this->messageId = $messageId;
     }
 
-    public function isValid(): bool
-    {
-        $validator = Validator::make(
-            $this->toArray(),
-            [
-                'text' => 'required|string',
-                'chat_type' => 'required|string',
-                'channel_type' => 'required|string',
-                'client_type' => 'required|integer',
-                'message_id' => 'required|integer',
-            ]
-        );
-
-        return $validator->passes();
-    }
-
-
     public function toArray(): array
     {
         return [
@@ -54,7 +36,7 @@ class AppealDTO implements DTOInterface
         ];
     }
 
-    public function fromModel(Appeal $appeal): self
+    public static function fromModel(ArchiveMessage $appeal): self
     {
         return new self(
             $appeal->text,

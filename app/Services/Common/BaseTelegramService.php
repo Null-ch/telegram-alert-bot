@@ -3,6 +3,7 @@
 namespace App\Services\Common;
 
 use GuzzleHttp\Client;
+use App\DTO\MailingDTO;
 use App\Enums\ChatType;
 use App\DTO\ApiResponseDTO;
 use Illuminate\Support\Arr;
@@ -10,6 +11,8 @@ use Telegram\Bot\Objects\Update;
 use Psr\Http\Message\ResponseInterface;
 use Telegram\Bot\Laravel\Facades\Telegram;
 use App\Interfaces\TelegramServiceInterface;
+use App\Services\Common\BaseGroupChatService;
+use App\Services\Common\ArchiveMessageService;
 
 class BaseTelegramService implements TelegramServiceInterface
 {
@@ -17,15 +20,25 @@ class BaseTelegramService implements TelegramServiceInterface
     public BaseAppealService $baseAppealService;
     public BaseClientService $baseClientService;
     public BaseIgnoreListService $baseIgnoreListService;
+    public BaseGroupChatService $baseGroupChatService;
+    public BaseMailingService $baseMailingService;
+    public ArchiveMessageService $archiveMessageService;
+
     public function __construct(
         BaseAppealService $baseAppealService,
         BaseClientService $baseClientService,
         BaseIgnoreListService $baseIgnoreListService,
+        BaseGroupChatService $baseGroupChatService,
+        BaseMailingService $baseMailingService,
+        ArchiveMessageService $archiveMessageService,
     ) {
         $this->client = new Client;
         $this->baseAppealService = $baseAppealService;
         $this->baseClientService = $baseClientService;
         $this->baseIgnoreListService = $baseIgnoreListService;
+        $this->baseGroupChatService = $baseGroupChatService;
+        $this->baseMailingService = $baseMailingService;
+        $this->archiveMessageService = $archiveMessageService;
     }
 
     public function setWebhook(string $prefix): ApiResponseDTO
@@ -173,6 +186,7 @@ class BaseTelegramService implements TelegramServiceInterface
         }
 
         if ($text = $this->getText($response)) {
+            $chatId = Arr::get($this->getChatData($response), 'id');
             $chat = $this->getChatName($response);
             $nick = $this->getUsername($response);
             $username = $this->getUserFullName($response);
@@ -207,15 +221,59 @@ class BaseTelegramService implements TelegramServiceInterface
             $this->baseAppealService->createAppeal([
                 'text' => $text,
                 'chat' => $chat ? $chat : ChatType::private->value,
+                'chatId' => $chatId,
                 'channelType' => $currentAccount,
                 'clientId' => $newClientData->getClientId(),
                 'messageId' => $this->getMessageId($response),
             ]);
 
+            $this->baseGroupChatService->create(
+                [
+                    'title' => $chat,
+                    'account' => $currentAccount,
+                    'chatId' => $chatId,
+                ]
+            );
+
             return $message;
         }
 
         return null;
+    }
+
+    public function handleMessage(Update|array $response, string $currentAccount): void
+    {
+        $isMessage = $this->isMessage($response);
+        if (!$isMessage) {
+            return;
+        }
+        $userId = $this->getUserId($response);
+        if ($this->isIgnored($userId) && !in_array($userId, [
+            '6256784114',
+            '6899147031',
+            '6960195534',
+        ])) {
+            return;
+        }
+
+        $text = $this->getText($response);
+        $chatName = $this->getChatName($response) ? $this->getChatName($response) : ChatType::private->value;
+        $username = $this->getUserFullName($response);
+        $chatId = Arr::get($this->getChatData($response), 'id');
+
+        $newClientData = $this->baseClientService->createClient([
+            'fullName' => $username,
+            'tgId' => $userId,
+            'channelType' => $currentAccount,
+        ]);
+        $this->archiveMessageService->create([
+            'text' => $text,
+            'chat' => $chatName,
+            'chatId' => $chatId,
+            'channelType' => $currentAccount,
+            'clientId' => $newClientData->getClientId(),
+            'messageId' => $this->getMessageId($response),
+        ]);
     }
 
     public function isGroupMessage(Update|array $response): ?bool
@@ -267,7 +325,7 @@ class BaseTelegramService implements TelegramServiceInterface
     public function getChatId(Update|array $response): ?string
     {
         if ($chatData = $this->getFromData($response)) {
-            return $chatData['id'];
+            return Arr::get($chatData, 'id');
         }
 
         return null;
@@ -366,6 +424,18 @@ class BaseTelegramService implements TelegramServiceInterface
         }
     }
 
+    public function sendMessage(string $chatId, string $message, string $botName): void
+    {
+        try {
+            Telegram::bot($botName)->sendMessage([
+                'chat_id' => $chatId,
+                'text' => "$message",
+            ]);
+        } finally {
+            //
+        }
+    }
+
     public function getAdminChatId(): string
     {
         return env('TELEGRAM_APPEAL_GROUP_ID');
@@ -413,5 +483,17 @@ class BaseTelegramService implements TelegramServiceInterface
         }
 
         return false;
+    }
+
+    public function sendMailing(string $message, string $tag): void
+    {
+        $groupChats = $this->baseGroupChatService->getChatsByTag($tag);
+        $this->baseMailingService->create(new MailingDTO(
+                $message,
+                $tag,
+            ));
+        foreach ($groupChats as $chat) {
+            $this->sendMessage($chat->getChatId(), $message, $tag);
+        }
     }
 }
