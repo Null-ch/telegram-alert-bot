@@ -29,4 +29,8 @@ class AdminController extends Controller
         $this->baseTelegramService->sendMailing($request->get('message'), $request->get('account'));
         return redirect('admin/resource/mailing-resource/mailing-index-page');
     }
+
+    public function test(Request $request)
+    {
+    }
 }

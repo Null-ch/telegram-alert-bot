@@ -20,4 +20,11 @@ class ArchiveMessageRepository
 
         return $dto::fromModel($archiveMessage);
     }
+
+    public function getMessages(string $dateStart, string $dateEnd = null)
+    {
+        return ArchiveMessage::dateRange($dateStart, $dateEnd)
+            ->groupByChatId()
+            ->get();
+    }
 }

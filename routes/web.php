@@ -7,3 +7,4 @@ use App\Http\Controllers\Web\AdminController;
 
 // Auth::routes(['register' => false]);
 Route::post('/handle-form', [AdminController::class, 'sendMailing'])->name('send.mailing');
+Route::get('/test', [AdminController::class, 'test'])->name('test.test');

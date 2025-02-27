@@ -42,25 +42,32 @@ class Dashboard extends Page
      */
     protected function components(): iterable
     {
-        $startOfMonth = Carbon::now()->startOfMonth();
-        $endOfMonth = Carbon::now()->endOfMonth();
-        return [
+        // $startOfMonth = Carbon::now()->startOfMonth();
+        // $endOfMonth = Carbon::now()->endOfMonth();
+        // $todayCount = count(Appeal::whereBetween('created_at', [
+        //     Carbon::today()->startOfDay(),
+        //     Carbon::today()->endOfDay()
+        // ])->get());
+        $metrics = [
             ValueMetric::make('Всего обращений')
                 ->value(Appeal::count())
                 ->columnSpan(6),
             ValueMetric::make('Всего уникальных пользователей')
                 ->value(Client::count())
-                ->columnSpan(6),
-            LineChartMetric::make('Обращения')
-                ->line([
-                    'Обращения' => Appeal::query()
-                        ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-                        ->selectRaw('DATE_FORMAT(created_at, "%d.%m.%Y") as date, COUNT(*) as count')
-                        ->groupBy(['date'])
-                        ->pluck('count', 'date')
-                        ->toArray()
-                ]),
-
+                ->columnSpan(6)
         ];
+        // if ($todayCount > 0) {
+        //     $metrics[] = LineChartMetric::make('Обращения')
+        //         ->line([
+        //             'Обращения' => Appeal::query()
+        //                 ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+        //                 ->selectRaw('DATE_FORMAT(created_at, "%d.%m.%Y") as date, COUNT(*) as count')
+        //                 ->groupBy(['date'])
+        //                 ->pluck('count', 'date')
+        //                 ->toArray()
+        //         ]);
+        // }
+
+        return $metrics;
     }
 }

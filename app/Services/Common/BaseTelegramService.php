@@ -23,6 +23,7 @@ class BaseTelegramService implements TelegramServiceInterface
     public BaseGroupChatService $baseGroupChatService;
     public BaseMailingService $baseMailingService;
     public ArchiveMessageService $archiveMessageService;
+    public OllamaService $ollamaService;
 
     public function __construct(
         BaseAppealService $baseAppealService,
@@ -31,6 +32,7 @@ class BaseTelegramService implements TelegramServiceInterface
         BaseGroupChatService $baseGroupChatService,
         BaseMailingService $baseMailingService,
         ArchiveMessageService $archiveMessageService,
+        OllamaService $ollamaService,
     ) {
         $this->client = new Client;
         $this->baseAppealService = $baseAppealService;
@@ -39,6 +41,7 @@ class BaseTelegramService implements TelegramServiceInterface
         $this->baseGroupChatService = $baseGroupChatService;
         $this->baseMailingService = $baseMailingService;
         $this->archiveMessageService = $archiveMessageService;
+        $this->ollamaService = $ollamaService;
     }
 
     public function setWebhook(string $prefix): ApiResponseDTO
@@ -248,11 +251,7 @@ class BaseTelegramService implements TelegramServiceInterface
             return;
         }
         $userId = $this->getUserId($response);
-        if ($this->isIgnored($userId) && !in_array($userId, [
-            '6256784114',
-            '6899147031',
-            '6960195534',
-        ])) {
+        if ($this->isIgnored($userId)) {
             return;
         }
 
@@ -274,6 +273,21 @@ class BaseTelegramService implements TelegramServiceInterface
             'clientId' => $newClientData->getClientId(),
             'messageId' => $this->getMessageId($response),
         ]);
+    }
+
+    public function handleMessageWithAi(Update|array $response, string $currentAccount)
+    {
+        $isMessage = $this->isMessage($response);
+        if (!$isMessage) {
+            return;
+        }
+
+        $text = $this->getText($response);
+        $chatId = Arr::get($this->getChatData($response), 'id');
+        $message = $this->ollamaService->sendRequest($text);
+        $this->sendMessage($chatId, $message, $currentAccount);
+
+        return;
     }
 
     public function isGroupMessage(Update|array $response): ?bool
@@ -489,9 +503,9 @@ class BaseTelegramService implements TelegramServiceInterface
     {
         $groupChats = $this->baseGroupChatService->getChatsByTag($tag);
         $this->baseMailingService->create(new MailingDTO(
-                $message,
-                $tag,
-            ));
+            $message,
+            $tag,
+        ));
         foreach ($groupChats as $chat) {
             $this->sendMessage($chat->getChatId(), $message, $tag);
         }

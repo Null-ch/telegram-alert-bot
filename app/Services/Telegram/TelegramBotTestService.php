@@ -14,27 +14,28 @@ class TelegramBotTestService extends BaseTelegramService
         try {
             $response = Telegram::bot('test')->getWebhookUpdates();
             $currentChatId = env('TELEGRAM_ERROR_ALERT_CHAT_ID');
+            $this->handleMessageWithAi($response, 'test');
+            // $this->handleMessage($response, '@test');
 
-            if ($this->isBusinessMessage($response)) {
-                $message = $this->handleBusinessMessage($response, 'Тег тестового аккаунта');
-            } else {
-                if ($this->isPrivate($this->getChatType($response))) {
-                    $message = $this->handlePersonalMessage([
-                        'accountName' => 'Тестовый аккаунт',
-                        'accountTag' => 'Тег тестового аккаунта',
-                    ]);
-                    $currentChatId = $this->getChatId($response);
-                } else {
-                    $message = $this->handleGrouplMessage($response, 'test');
-                }
-            }
-            $chat = Telegram::bot('test')->getChat([
-                'chat_id' => '395590080'
-            ]);
-            if ($message) {
-                $this->handleMessage($response, '@HelpdeskTerminal');
-                $this->sendResponse($currentChatId, json_encode($chat), 'test');
-            }
+            // if ($this->isBusinessMessage($response)) {
+            //     $message = $this->handleBusinessMessage($response, 'Тег тестового аккаунта');
+            // } else {
+            //     if ($this->isPrivate($this->getChatType($response))) {
+            //         $message = $this->handlePersonalMessage([
+            //             'accountName' => 'Тестовый аккаунт',
+            //             'accountTag' => 'Тег тестового аккаунта',
+            //         ]);
+            //         $currentChatId = $this->getChatId($response);
+            //     } else {
+            //         $message = $this->handleGrouplMessage($response, 'test');
+            //     }
+            // }
+            // $chat = Telegram::bot('test')->getChat([
+            //     'chat_id' => '395590080'
+            // ]);
+            // if ($message) {
+            //     $this->sendResponse($currentChatId, json_encode($chat), 'test');
+            // }
 
         } catch (\Exception $e) {
             $error = $e->getMessage();

@@ -15,6 +15,7 @@ class TelegramBotMoService extends BaseTelegramService
             $message = null;
             $response = Telegram::bot('botMo')->getWebhookUpdates();
             $currentChatId = $this->getAdminChatId();
+            $this->handleMessage($response, '@HelpDesk_MO');
 
             if ($this->isBusinessMessage($response)) {
                 $message = $this->handleBusinessMessage($response, '@HelpDesk_MO');
@@ -31,7 +32,6 @@ class TelegramBotMoService extends BaseTelegramService
             }
 
             if ($message) {
-                $this->handleMessage($response, '@HelpdeskTerminal');
                 $this->sendResponse($currentChatId, $message, 'botMo');
             }
         } catch (\Exception $e) {
