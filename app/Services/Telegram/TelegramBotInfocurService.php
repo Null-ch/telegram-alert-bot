@@ -15,7 +15,8 @@ class TelegramBotInfocurService extends BaseTelegramService
             $message = null;
             $response = Telegram::bot('botInfocur')->getWebhookUpdates();
             $currentChatId = $this->getAdminChatId();
-            $this->handleMessage($response, '@HelpdeskTerminal');
+            // $this->handleMessage($response, '@HelpdeskTerminal'); //деактивировано за ненадобностью в текущем проекте
+
             if ($this->isBusinessMessage($response)) {
                 $message = $this->handleBusinessMessage($response, '@HelpdeskTerminal');
             } else {

@@ -15,7 +15,7 @@ class TelegramBotOrionService extends BaseTelegramService
             $message = null;
             $response = Telegram::bot('botOrion')->getWebhookUpdates();
             $currentChatId = $this->getAdminChatId();
-            $this->handleMessage($response, '@HelpdeskOrionTerminal');
+            // $this->handleMessage($response, '@HelpdeskTerminal'); //деактивировано за ненадобностью в текущем проекте
 
             if ($this->isBusinessMessage($response)) {
                 $message = $this->handleBusinessMessage($response, '@HelpdeskOrionTerminal');

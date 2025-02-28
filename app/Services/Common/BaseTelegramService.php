@@ -114,6 +114,14 @@ class BaseTelegramService implements TelegramServiceInterface
         return $message . $contacts;
     }
 
+    /**
+     * Метод позволяет обрабатывать личные сообщения, с последующей пересылкой в чаты
+     * 
+     * @param Update|array $response
+     * @param string $currentAccount
+     * 
+     * @return string|null
+     */
     public function handleBusinessMessage(Update|array $response, string $currentAccount): ?string
     {
         $isMessage = $this->isMessage($response);
@@ -176,6 +184,14 @@ class BaseTelegramService implements TelegramServiceInterface
         return $message;
     }
 
+    /**
+     * Метод позволяет обрабатывать групповые сообщения, с последующей пересылкой в чаты
+     * 
+     * @param Update|array $response
+     * @param string $currentAccount
+     * 
+     * @return string|null
+     */
     public function handleGrouplMessage(Update|array $response, string $currentAccount): ?string
     {
         $isMessage = $this->isMessage($response);
@@ -244,6 +260,14 @@ class BaseTelegramService implements TelegramServiceInterface
         return null;
     }
 
+    /**
+     * Метод позволяет обрабатывать любое сообщение и заносить его в базу, без пересылки в чаты
+     * 
+     * @param Update|array $response
+     * @param string $currentAccount
+     * 
+     * @return void
+     */
     public function handleMessage(Update|array $response, string $currentAccount): void
     {
         $isMessage = $this->isMessage($response);
