@@ -17,6 +17,7 @@ use App\MoonShine\Resources\ClientResource;
 use App\MoonShine\Resources\GroupChatResource;
 use App\MoonShine\Resources\MailingResource;
 use App\MoonShine\Pages\MailingPage;
+use App\MoonShine\Resources\ReportsResource;
 
 class MoonShineServiceProvider extends ServiceProvider
 {
@@ -38,6 +39,7 @@ class MoonShineServiceProvider extends ServiceProvider
                 ClientResource::class,
                 GroupChatResource::class,
                 MailingResource::class,
+                ReportsResource::class,
             ])
             ->pages([
                 ...$config->getPages(),

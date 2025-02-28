@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 
 class AppealDTO implements DTOInterface
 {
+    public ?string $date;
     public function __construct(
         public string $text,
         public string $chat,
@@ -54,9 +55,9 @@ class AppealDTO implements DTOInterface
         ];
     }
 
-    public function fromModel(Appeal $appeal): self
+    public static function fromModel(Appeal $appeal): self
     {
-        return new self(
+        $appealDTO = new self(
             $appeal->text,
             $appeal->chat,
             $appeal->chat_id,
@@ -64,6 +65,9 @@ class AppealDTO implements DTOInterface
             $appeal->client_id,
             $appeal->message_id,
         );
+        $appealDTO->date = $appeal->created_at;
+
+        return $appealDTO;
     }
 
     public function getText(): string

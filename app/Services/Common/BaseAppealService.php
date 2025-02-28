@@ -5,8 +5,10 @@ namespace App\Services\Common;
 use Throwable;
 use Carbon\Carbon;
 use App\DTO\AppealDTO;
+use App\Models\Report;
 use App\Enums\ChatType;
 use Illuminate\Support\Arr;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Repositories\AppealRepository;
 use App\Interfaces\AppealServiceInterface;
@@ -14,11 +16,17 @@ use App\Interfaces\AppealServiceInterface;
 class BaseAppealService implements AppealServiceInterface
 {
     public AppealRepository $appealRepository;
+    public BaseClientService $baseClientService;
+    public BaseExportService $baseExportService;
 
     public function __construct(
-        AppealRepository $appealRepository
+        AppealRepository $appealRepository,
+        BaseClientService $baseClientService,
+        BaseExportService $baseExportService,
     ) {
         $this->appealRepository = $appealRepository;
+        $this->baseClientService = $baseClientService;
+        $this->baseExportService = $baseExportService;
     }
 
     public function createAppeal(array $appealDataArray): ?AppealDTO
@@ -62,7 +70,7 @@ class BaseAppealService implements AppealServiceInterface
             return false;
         }
     }
-    
+
     public function getAppeal(int $id): ?AppealDTO
     {
         return $this->appealRepository->getAppeal($id);
@@ -71,5 +79,21 @@ class BaseAppealService implements AppealServiceInterface
     public function getAppeals(int $count, string $sort): ?array
     {
         return $this->appealRepository->getAppeals($count, $sort);
+    }
+
+    public function generateReport(Request $request)
+    {
+        $dateFrom = $request->input('период.from');
+        $dateTo = $request->input('период.to');
+        $appeals = $this->appealRepository->getAppealsByDateRange($dateFrom, $dateTo);
+        $exportArray = $this->baseExportService->prepareAppealsArray($appeals);
+        $filename = sprintf('appeal_report_%s.xlsx', now()->format('Ymd_His'));
+        $filePath = $this->baseExportService->exportToExcel($exportArray, $filename);
+        $reportId = $this->baseExportService->createReport([
+            'title' => $filename,
+            'path' => $filePath
+        ]);
+
+        return $reportId;
     }
 }

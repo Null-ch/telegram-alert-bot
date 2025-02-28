@@ -17,7 +17,7 @@ class MailingRepository
 
     public function create(MailingDTO $dto): MailingDTO
     {
-        $ignoreList = $this->mailing::create($dto->toArray());
-        return $dto->fromModel($ignoreList);
+        $mailing = $this->mailing::create($dto->toArray());
+        return $dto->fromModel($mailing);
     }
 }

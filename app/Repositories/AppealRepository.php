@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use Carbon\Carbon;
 use App\DTO\AppealDTO;
 use App\Models\Appeal;
 use App\Interfaces\AppealRepositoryInterface;
@@ -19,7 +20,7 @@ class AppealRepository implements AppealRepositoryInterface
         $appeal->message_id = $dto->messageId;
         $appeal->save();
 
-        return $dto->fromModel($appeal);
+        return $dto::fromModel($appeal);
     }
 
     public function getLastAppeal(int|string $id): ?Appeal
@@ -51,31 +52,46 @@ class AppealRepository implements AppealRepositoryInterface
 
     public function getAppeals(int $count, string $sort): ?array
     {
-            $query = Appeal::query();
+        $query = Appeal::query();
 
-            switch ($sort) {
-                case 'DESC':
-                    $query->orderBy('created_at', 'DESC');
-                    break;
-                case 'ASC':
-                    $query->orderBy('created_at', 'ASC');
-                    break;
-                default:
-                    throw new \InvalidArgumentException("Invalid sort parameter. Must be either 'desc' or 'asc'.");
-            }
+        switch ($sort) {
+            case 'DESC':
+                $query->orderBy('created_at', 'DESC');
+                break;
+            case 'ASC':
+                $query->orderBy('created_at', 'ASC');
+                break;
+            default:
+                throw new \InvalidArgumentException("Invalid sort parameter. Must be either 'desc' or 'asc'.");
+        }
 
-            $results = $query->take($count)->get();
-            $appeals = [];
-            foreach ($results as $result) {
-                $appeals[] = new AppealDTO(
-                    $result->text,
-                    $result->chat,
-                    $result->chat_id,
-                    $result->channel_type,
-                    $result->client_id,
-                    $result->message_id
-                );
-            }
-            return $appeals;
+        $results = $query->take($count)->get();
+        $appeals = [];
+        foreach ($results as $result) {
+            $appeals[] = new AppealDTO(
+                $result->text,
+                $result->chat,
+                $result->chat_id,
+                $result->channel_type,
+                $result->client_id,
+                $result->message_id
+            );
+        }
+        return $appeals;
+    }
+
+    public function getAppealsByDateRange(string $startDate, string $endDate): array
+    {
+        $appeals = Appeal::whereBetween('created_at', [
+            Carbon::parse($startDate)->startOfDay(),
+            Carbon::parse($endDate)->endOfDay()
+        ])->get();
+
+        $appealsDTO = [];
+        foreach ($appeals as $appeal) {
+            $appealsDTO[] = AppealDTO::fromModel($appeal);
+        }
+
+        return $appealsDTO;
     }
 }

@@ -7,9 +7,15 @@ namespace App\MoonShine\Pages;
 use Carbon\Carbon;
 use App\Models\Appeal;
 use App\Models\Client;
+use MoonShine\UI\Fields\ID;
+use PhpParser\Node\Stmt\Block;
 use MoonShine\Laravel\Pages\Page;
 use MoonShine\UI\Fields\DateRange;
+use MoonShine\UI\Components\Layout\Box;
+use MoonShine\UI\Components\Layout\Grid;
+use MoonShine\UI\Components\Layout\Column;
 use MoonShine\Contracts\UI\ComponentContract;
+use MoonShine\UI\Components\Table\TableBuilder;
 use MoonShine\Apexcharts\Components\LineChartMetric;
 use MoonShine\UI\Components\Metrics\Wrapped\ValueMetric;
 
@@ -42,32 +48,32 @@ class Dashboard extends Page
      */
     protected function components(): iterable
     {
-        // $startOfMonth = Carbon::now()->startOfMonth();
-        // $endOfMonth = Carbon::now()->endOfMonth();
-        // $todayCount = count(Appeal::whereBetween('created_at', [
-        //     Carbon::today()->startOfDay(),
-        //     Carbon::today()->endOfDay()
-        // ])->get());
-        $metrics = [
-            ValueMetric::make('Всего обращений')
-                ->value(Appeal::count())
-                ->columnSpan(6),
-            ValueMetric::make('Всего уникальных пользователей')
-                ->value(Client::count())
-                ->columnSpan(6)
-        ];
-        // if ($todayCount > 0) {
-        //     $metrics[] = LineChartMetric::make('Обращения')
-        //         ->line([
-        //             'Обращения' => Appeal::query()
-        //                 ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-        //                 ->selectRaw('DATE_FORMAT(created_at, "%d.%m.%Y") as date, COUNT(*) as count')
-        //                 ->groupBy(['date'])
-        //                 ->pluck('count', 'date')
-        //                 ->toArray()
-        //         ]);
-        // }
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
 
-        return $metrics;
+        return [
+            Grid::make([
+                Column::make([
+                    Box::make('Общие показатели', [
+                        ValueMetric::make('Всего обращений')
+                            ->value(Appeal::count())
+                            ->columnSpan(6),
+                        ValueMetric::make('Всего уникальных пользователей')
+                            ->value(Client::count())
+                            ->columnSpan(6),
+                    ]),
+                ], 6),
+                Column::make([
+                    Box::make('Показатели за текущий месяц', [
+                        ValueMetric::make('Всего обращений')
+                            ->value(Appeal::whereBetween('created_at', [$startOfMonth, $endOfMonth])->count())
+                            ->columnSpan(6),
+                        ValueMetric::make('Всего уникальных пользователей')
+                            ->value(Client::whereBetween('created_at', [$startOfMonth, $endOfMonth])->count())
+                            ->columnSpan(6),
+                    ]),
+                ], 6),
+            ])
+        ];
     }
 }

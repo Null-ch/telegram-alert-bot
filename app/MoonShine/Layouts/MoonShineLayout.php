@@ -38,6 +38,7 @@ use App\MoonShine\Resources\ClientResource;
 use App\MoonShine\Resources\GroupChatResource;
 use App\MoonShine\Resources\MailingResource;
 use App\MoonShine\Pages\MailingPage;
+use App\MoonShine\Resources\ReportsResource;
 final class MoonShineLayout extends AppLayout
 {
     protected function assets(): array
@@ -52,6 +53,7 @@ final class MoonShineLayout extends AppLayout
         return [
             MenuGroup::make('Alert-Bot', [
                 MenuItem::make('Обращения', AppealResource::class),
+                MenuItem::make('Отчеты', ReportsResource::class),
                 MenuItem::make('Пользователи', ClientResource::class),
                 MenuItem::make('Игнор-лист', IgnoreListResource::class),
                 MenuGroup::make('Рассылки', [
