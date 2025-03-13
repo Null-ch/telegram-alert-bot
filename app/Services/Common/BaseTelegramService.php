@@ -246,14 +246,6 @@ class BaseTelegramService implements TelegramServiceInterface
                 'messageId' => $this->getMessageId($response),
             ]);
 
-            $this->baseGroupChatService->create(
-                [
-                    'title' => $chat,
-                    'account' => $currentAccount,
-                    'chatId' => $chatId,
-                ]
-            );
-
             return $message;
         }
 
