@@ -31,6 +31,16 @@
 -   PHP 8.2 or higher
 -   NPM 10 or higher
 
+## Внешний вид (превью)
+<details>
+  <summary>Главная страница</summary>
+    <img src="https://github.com/user-attachments/assets/78673846-b892-4765-85c8-3da1eea3b540">
+</details>
+<details>
+  <summary>Сайдбар</summary>
+    <img src="https://github.com/user-attachments/assets/791220a1-8c0f-4098-b837-903ed1313636">
+</details>
+
 ## Установка
 
 1.  **Клонируйте репозиторий:**
