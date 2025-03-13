@@ -459,7 +459,8 @@ class BaseTelegramService implements TelegramServiceInterface
         try {
             Telegram::bot($botName)->sendMessage([
                 'chat_id' => $chatId,
-                'text' => "$message",
+                'text' => $message,
+                'parse_mode' => 'markdown'
             ]);
         } finally {
             //

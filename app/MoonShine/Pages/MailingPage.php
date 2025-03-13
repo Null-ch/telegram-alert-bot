@@ -4,14 +4,11 @@ declare(strict_types=1);
 
 namespace App\MoonShine\Pages;
 
-use MoonShine\UI\Fields\Text;
-use MoonShine\UI\Fields\Email;
 use MoonShine\UI\Fields\Select;
 use MoonShine\Laravel\Pages\Page;
-use MoonShine\Laravel\Layouts\AppLayout;
 use MoonShine\UI\Components\FormBuilder;
-use MoonShine\UI\Components\Layout\Grid;
 use MoonShine\Contracts\UI\ComponentContract;
+use MoonShine\EasyMde\Fields\Markdown;
 
 class MailingPage extends Page
 {
@@ -38,7 +35,7 @@ class MailingPage extends Page
         return [
             FormBuilder::make(route('send.mailing'))
                 ->fields([
-                    Text::make('Текст', 'message')->required(),
+                    Markdown::make('Текст', 'message')->required(),
                     Select::make('Аккаунт', 'account')
                         ->options([
                             'botInfocur' => 'Терминал - инфоцур (регионы)',
