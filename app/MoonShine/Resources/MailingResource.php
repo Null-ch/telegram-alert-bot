@@ -50,10 +50,11 @@ class MailingResource extends ModelResource
             Text::make('Сообщение', 'message')->required(),
             Select::make('Аккаунт', 'account')
                 ->options([
+                    '' => 'Выберите аккаунт',
+                    'test' => 'Тестовый',
                     'botInfocur' => 'Терминал - инфоцур (регионы)',
                     'botMo' => 'Терминал - мосрег (МО)',
                     'botOrion' => 'Терминал - орион (калуга)',
-                    'test' => 'Тестовый',
                 ])->required(),
         ];
     }

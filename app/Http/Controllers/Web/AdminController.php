@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Models\Report;
+use App\Models\GroupChat;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\Common\BaseAppealService;
@@ -29,7 +30,7 @@ class AdminController extends Controller
 
     public function sendMailing(Request $request)
     {
-        $this->baseTelegramService->sendMailing($request->get('message'), $request->get('account'));
+        $this->baseTelegramService->sendMailing($request);
         return redirect('admin/resource/mailing-resource/mailing-index-page');
     }
 
@@ -45,7 +46,19 @@ class AdminController extends Controller
         return redirect()->route('reports.download', $reportId);
     }
 
-    public function test(Request $request)
+    public function getGroupChats(Request $request)
     {
+        $account = $request->query('account');
+
+        $groupChats = GroupChat::where('account', $account)
+        ->orderBy('title', 'ASC')
+            ->pluck('title', 'id')
+            ->map(function ($title, $id) use ($account) {
+                return "{$title} ({$account})";
+            });
+
+        return response()->json($groupChats);
     }
+
+    public function test(Request $request) {}
 }

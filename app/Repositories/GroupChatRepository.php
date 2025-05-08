@@ -37,4 +37,12 @@ class GroupChatRepository implements GroupChatRepositoryInterface
         $ignoreList = $this->groupChat->firstOrCreate($dto->toArray());
         return $dto->fromModel($ignoreList);
     }
+
+    public function getGroupChat(int $id): ?GroupChatDTO
+    {
+        $groupChatModel = GroupChat::findOrFail($id);
+        $groupChatDTO = GroupChatDTO::fromModel($groupChatModel);
+
+        return $groupChatDTO;
+    }
 }

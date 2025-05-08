@@ -7,7 +7,11 @@ use App\DTO\MailingDTO;
 use App\Enums\ChatType;
 use App\DTO\ApiResponseDTO;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use Telegram\Bot\Objects\Update;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Psr\Http\Message\ResponseInterface;
 use Telegram\Bot\Laravel\Facades\Telegram;
 use App\Interfaces\TelegramServiceInterface;
@@ -24,6 +28,7 @@ class BaseTelegramService implements TelegramServiceInterface
     public BaseMailingService $baseMailingService;
     public ArchiveMessageService $archiveMessageService;
     public OllamaService $ollamaService;
+    public BaseCommandService $baseCommandService;
 
     public function __construct(
         BaseAppealService $baseAppealService,
@@ -63,7 +68,16 @@ class BaseTelegramService implements TelegramServiceInterface
 
     public function getToken(string $prefix): string
     {
-        return env('TELEGRAM_' . strtoupper($prefix) . '_BOT_TOKEN');
+        return match ($prefix) {
+            'test' => env('TELEGRAM_TEST_BOT_TOKEN'),
+            'botInfocur' => env('TELEGRAM_INFOCUR_BOT_TOKEN'),
+            'botMo' => env('TELEGRAM_MO_BOT_TOKEN'),
+            'botOrion' => env('TELEGRAM_ORION_BOT_TOKEN'),
+            'infocur' => env('TELEGRAM_INFOCUR_BOT_TOKEN'),
+            'mo' => env('TELEGRAM_MO_BOT_TOKEN'),
+            'orion' => env('TELEGRAM_ORION_BOT_TOKEN'),
+            default => throw new \RuntimeException('Telegram token not found for selected account'),
+        };
     }
 
     public function getTelegramApiUrl(string $token, string $type): ?string
@@ -149,6 +163,7 @@ class BaseTelegramService implements TelegramServiceInterface
         }
 
         $text = $this->getText($response);
+
         $nick = $this->getUsername($response);
         $username = $this->getUserFullName($response);
         if ($text) {
@@ -454,22 +469,42 @@ class BaseTelegramService implements TelegramServiceInterface
         }
     }
 
-    public function sendMessage(string $chatId, string $message, string $botName): void
+    public function sendMessage(string $chatId, string $message, string $botName, string $parseMode = 'html'): void
     {
         try {
-            Telegram::bot($botName)->sendMessage([
-                'chat_id' => $chatId,
-                'text' => $message,
-                'parse_mode' => 'markdown'
+            if (stripos($botName, 'bot') !== false) {
+                $tag = Str::lower(str_replace('bot', '', $botName));
+            } else {
+                $tag = Str::lower($botName);
+            }
+            if (empty($tag)) {
+                return;
+            }
+
+            $token = $this->getToken($tag);
+
+            $this->client->post(env('TELEGRAM_BASE_URL') . "/bot{$token}/sendMessage", [
+                'form_params' => [
+                    'chat_id' => $chatId,
+                    'text' => $message,
+                    'parse_mode' => $parseMode
+                ]
             ]);
-        } finally {
-            //
+        } catch (\Exception $e) {
+            $error = $e->getMessage();
+            $errorMessage = "Chat ID: {$chatId}, botName {$botName} Ошибка: {$error}\n";
+            $this->sendResponse(env('TELEGRAM_ERROR_ALERT_CHAT_ID'), $errorMessage, 'test');
         }
     }
 
     public function getAdminChatId(): string
     {
         return env('TELEGRAM_APPEAL_GROUP_ID');
+    }
+
+    public function getFunChatId(): string
+    {
+        return env('TELEGRAM_FUN_GROUP');
     }
 
     public function generateForwardedMessage(array $params): string
@@ -516,15 +551,75 @@ class BaseTelegramService implements TelegramServiceInterface
         return false;
     }
 
-    public function sendMailing(string $message, string $tag): void
+    public function sendMailing(Request $request): void
     {
-        $groupChats = $this->baseGroupChatService->getChatsByTag($tag);
+        $tag = $request->get('account');
+        $message = $request->get('message');
+        $chatIds = $request->get('chat_ids') ?? [];
+        $file = $request->file('file') ?? null;
+        if ($file instanceof UploadedFile) {
+            $filename = uniqid() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('temp_uploads', $filename);
+            $fullPath = Storage::disk('local')->path($path);
+
+            $storedFile = new UploadedFile(
+                $fullPath,
+                $file->getClientOriginalName(),
+                $file->getMimeType(),
+                null,
+                true
+            );
+        }
+
         $this->baseMailingService->create(new MailingDTO(
             $message,
             $tag,
         ));
-        foreach ($groupChats as $chat) {
-            $this->sendMessage($chat->getChatId(), $message, $tag);
+
+        foreach ($chatIds as $chatId) {
+            $chatIdResolved = $this->baseGroupChatService->getGroupChatId($chatId);
+
+            if ($file) {
+                $this->sendDocument($chatIdResolved, $storedFile, $tag, $message);
+            } else {
+                $this->sendMessage($chatIdResolved, $message, $tag);
+            }
         }
+
+        if ($file) {
+            Storage::disk('local')->delete($path);
+        }
+    }
+
+    public function sendDocument(string $chatId, UploadedFile $file, string $tag, ?string $caption = null): void
+    {
+        if (empty($tag)) {
+            return;
+        }
+
+        $token = $this->getToken($tag);
+        $multipart = [
+            [
+                'name'     => 'chat_id',
+                'contents' => $chatId,
+            ],
+            [
+                'name'     => 'document',
+                'contents' => fopen($file->getRealPath(), 'r'),
+                'filename' => $file->getClientOriginalName(),
+            ],
+        ];
+
+        if ($caption) {
+            $multipart[] = [
+                'name'     => 'caption',
+                'contents' => $caption,
+            ];
+        }
+
+        $this->client->post(env('TELEGRAM_BASE_URL') . "/bot{$token}/sendDocument", [
+            'multipart' => $multipart,
+            'parse_mode' => "markdown"
+        ]);
     }
 }

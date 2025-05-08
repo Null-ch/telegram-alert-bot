@@ -32,7 +32,6 @@ class TelegramBotOrionService extends BaseTelegramService
             }
 
             if ($message) {
-                $this->handleMessage($response, '@HelpdeskOrionTerminal');
                 $this->sendResponse($currentChatId, $message, 'botOrion');
             }
         } catch (\Exception $e) {

@@ -3,6 +3,7 @@
 namespace App\Services\Common;
 
 use App\DTO\GroupChatDTO;
+use App\Models\GroupChat;
 use Illuminate\Support\Arr;
 use App\Repositories\GroupChatRepository;
 use App\Interfaces\GroupChatServiceInterface;
@@ -39,5 +40,19 @@ class BaseGroupChatService implements GroupChatServiceInterface
             '@HelpDesk_MO' => 'botMo',
             '@HelpdeskTerminal' => 'botInfocur',
         };
+    }
+
+    public function getGroupChatById(int $id): ?GroupChatDTO
+    {
+        $groupChatModel = GroupChat::findOrFail($id);
+        $groupChatDTO = GroupChatDTO::fromModel($groupChatModel);
+
+        return $groupChatDTO;
+    }
+
+    public function getGroupChatId(int $id): ?string
+    {
+        $groupChatModel = $this->getGroupChatById($id);
+        return $groupChatModel->getChatId();
     }
 }

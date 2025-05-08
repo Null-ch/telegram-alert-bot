@@ -26,12 +26,12 @@ class GroupChatDTO
         ];
     }
 
-    public static function fromModel(GroupChat $client): self
+    public static function fromModel(GroupChat $groupChat): self
     {
         return new self(
-            $client->account,
-            $client->title,
-            $client->chat_id,
+            $groupChat->account,
+            $groupChat->title,
+            $groupChat->chat_id,
         );
     }
 

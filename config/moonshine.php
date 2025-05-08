@@ -1,12 +1,10 @@
 <?php
 
-use App\MoonShine\Pages\MailingPage;
+
 use MoonShine\Laravel\Forms\LoginForm;
-use MoonShine\Laravel\Pages\Dashboard;
 use MoonShine\Laravel\Pages\ErrorPage;
 use MoonShine\Laravel\Pages\LoginPage;
 use MoonShine\Laravel\Forms\FiltersForm;
-use MoonShine\Laravel\Layouts\AppLayout;
 use MoonShine\Laravel\Pages\ProfilePage;
 use MoonShine\Laravel\Models\MoonshineUser;
 use Illuminate\Session\Middleware\StartSession;
@@ -74,10 +72,7 @@ return [
         'name' => 'name',
         'avatar' => 'avatar',
     ],
-
-    // Layout, pages, forms
     'layout' => App\MoonShine\Layouts\MoonShineLayout::class,
-
     'forms' => [
         'login' => LoginForm::class,
         'filters' => FiltersForm::class,

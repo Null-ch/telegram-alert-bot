@@ -9,6 +9,7 @@ use App\Models\Appeal;
 use App\Models\Client;
 use MoonShine\UI\Fields\ID;
 use PhpParser\Node\Stmt\Block;
+use MoonShine\AssetManager\Raw;
 use MoonShine\Laravel\Pages\Page;
 use MoonShine\UI\Fields\DateRange;
 use MoonShine\UI\Components\Layout\Box;
@@ -73,6 +74,20 @@ class Dashboard extends Page
                             ->columnSpan(6),
                     ]),
                 ], 6),
+                Raw::make(
+                    <<<HTML
+                    <!-- HELPDESKEDDY WIDGETS START -->
+                    <script 
+                        src="//cdn5.helpdeskeddy.com//js/contact-widget.js" 
+                        id="hde-contact-widget" 
+                        data-assets-host="//cdn5.helpdeskeddy.com/" 
+                        data-host="nalitek.helpdeskeddy.com" 
+                        data-lang="ru" 
+                        defer>
+                    </script> 
+                    <!-- HELPDESKEDDY WIDGETS END -->
+                    HTML
+                ),
             ])
         ];
     }
