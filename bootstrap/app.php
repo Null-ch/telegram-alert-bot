@@ -18,17 +18,17 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->report(function (Throwable $e) {
-            $chatId = env('TELEGRAM_ERROR_ALERT_CHAT_ID');
-            $error = $e->getMessage();
-            $errorMessage = "Ошибка: {$error}\n";
+            // $chatId = env('TELEGRAM_ERROR_ALERT_CHAT_ID');
+            // $error = $e->getMessage();
+            // $errorMessage = "Ошибка: {$error}\n";
 
-            Log::error("Message: {$error}", $e->getTrace());
+            // Log::error("Message: {$error}", $e->getTrace());
 
-            try {
-                $telegramService = app(BaseTelegramService::class);
-                $telegramService->sendMessage($chatId, $errorMessage, 'test');
-            } catch (\Exception $telegramException) {
-                Log::error("Ошибка при отправке сообщения об ошибке в Telegram: " . $telegramException->getMessage());
-            }
+            // try {
+            //     $telegramService = app(BaseTelegramService::class);
+            //     $telegramService->sendMessage($chatId, $errorMessage, 'test');
+            // } catch (\Exception $telegramException) {
+            //     Log::error("Ошибка при отправке сообщения об ошибке в Telegram: " . $telegramException->getMessage());
+            // }
         });
     })->create();

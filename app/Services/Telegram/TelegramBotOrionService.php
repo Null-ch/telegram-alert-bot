@@ -35,10 +35,10 @@ class TelegramBotOrionService extends BaseTelegramService
                 $this->sendResponse($currentChatId, $message, 'botOrion');
             }
         } catch (\Exception $e) {
-            $error = $e->getMessage();
-            $errorMessage = "Ошибка: $error\n";
-            $this->sendResponse(env('TELEGRAM_ERROR_ALERT_CHAT_ID'), $errorMessage, 'test');
-            Log::error('Message: ' . $error, $e->getTrace());
+            // $error = $e->getMessage();
+            // $errorMessage = "Ошибка: $error\n";
+            // $this->sendResponse(env('TELEGRAM_ERROR_ALERT_CHAT_ID'), $errorMessage, 'test');
+            // Log::error('Message: ' . $error, $e->getTrace());
         }
     }
 }
