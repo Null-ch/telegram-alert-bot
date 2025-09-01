@@ -145,7 +145,8 @@ html.dark .custom-select:disabled {
         }
 
         // Запрос на сервер для получения чатов по аккаунту
-        const response = await fetch(`/admin/group-chats?account=${account}`);
+        const response = await fetch(`/api/group-chats?account=${account}`);
+
         const data = await response.json();
 
         chatSelect.innerHTML = ''; // Очистить текущий список чатов

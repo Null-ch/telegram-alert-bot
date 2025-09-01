@@ -11,4 +11,4 @@ Route::post('/handle-form', [AdminController::class, 'sendMailing'])->name('send
 Route::post('/reports/generate', [AdminController::class, 'generateReport'])->name('reports.generate');
 Route::get('/reports/download/{id}', [AdminController::class, 'download'])->name('reports.download');
 Route::post('/test', [AdminController::class, 'test'])->name('test.test');
-Route::get('/admin/group-chats', [AdminController::class, 'getGroupChats']);
+Route::get('/api/group-chats', [AdminController::class, 'getGroupChats']);
