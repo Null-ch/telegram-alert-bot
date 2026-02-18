@@ -14,6 +14,7 @@ class TelegramBotTestService extends BaseTelegramService
     {
         try {
             $response = Telegram::bot('test')->getWebhookUpdates();
+            Log::info(json_encode($response));
             $currentChatId = env('TELEGRAM_ERROR_ALERT_CHAT_ID');
             // if ($this->isPrivate($this->getChatType($response))) {
             //     $message = $this->handlePersonalMessage([
