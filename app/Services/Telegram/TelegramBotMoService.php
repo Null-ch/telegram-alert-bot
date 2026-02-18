@@ -21,7 +21,7 @@ class TelegramBotMoService extends BaseTelegramService
             if ($this->isReaction($response)) {
                 $data = $response->toArray();
                 $reactionDTO = new MessageReactionDTO($data);
-                $this->handleReaction($reactionDTO, 'test');
+                $this->handleReaction($reactionDTO, 'TerminalMosreg');
                 return;
             }
 
