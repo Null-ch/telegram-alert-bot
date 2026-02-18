@@ -39,6 +39,7 @@ use App\MoonShine\Resources\GroupChatResource;
 use App\MoonShine\Resources\MailingResource;
 use App\MoonShine\Pages\MailingPage;
 use App\MoonShine\Resources\ReportsResource;
+use App\MoonShine\Resources\MessageReactionResource;
 final class MoonShineLayout extends AppLayout
 {
     protected function assets(): array
