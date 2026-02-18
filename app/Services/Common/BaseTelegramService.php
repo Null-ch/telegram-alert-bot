@@ -18,6 +18,7 @@ use Telegram\Bot\Laravel\Facades\Telegram;
 use App\Interfaces\TelegramServiceInterface;
 use App\Services\Common\BaseGroupChatService;
 use App\Services\Common\ArchiveMessageService;
+use App\Services\Common\MessageReactionService;
 
 class BaseTelegramService implements TelegramServiceInterface
 {
@@ -30,6 +31,8 @@ class BaseTelegramService implements TelegramServiceInterface
     public ArchiveMessageService $archiveMessageService;
     public OllamaService $ollamaService;
     public BaseCommandService $baseCommandService;
+    public BaseEmployeeService $baseEmployeeService;
+    public MessageReactionService $messageReactionService;
 
     public function __construct(
         BaseAppealService $baseAppealService,
@@ -39,6 +42,8 @@ class BaseTelegramService implements TelegramServiceInterface
         BaseMailingService $baseMailingService,
         ArchiveMessageService $archiveMessageService,
         OllamaService $ollamaService,
+        BaseEmployeeService $baseEmployeeService,
+        MessageReactionService $messageReactionService,
     ) {
         $this->client = new Client;
         $this->baseAppealService = $baseAppealService;
@@ -48,6 +53,8 @@ class BaseTelegramService implements TelegramServiceInterface
         $this->baseMailingService = $baseMailingService;
         $this->archiveMessageService = $archiveMessageService;
         $this->ollamaService = $ollamaService;
+        $this->baseEmployeeService = $baseEmployeeService;
+        $this->messageReactionService = $messageReactionService;
     }
 
     public function setWebhook(string $prefix): ApiResponseDTO
@@ -645,8 +652,19 @@ class BaseTelegramService implements TelegramServiceInterface
         ]);
     }
 
-    public function handleReaction(MessageReactionDTO $dto, string $currentAccount)
+    public function handleReaction(MessageReactionDTO $dto, string $currentAccount): void
     {
-        return;
+        $employeeData = $this->baseEmployeeService->getEmployeeByTgId($dto->getUserId());
+
+        if (!$employeeData) {
+            $employeeData = $this->baseEmployeeService->createEmployee([
+                'firstName' => $dto->getUserFirstName(),
+                'lastName' => $dto->getUserLastName(),
+                'tag' => $dto->getUsername(),
+                'tgId' => $dto->getUserId(),
+            ]);
+        }
+
+        $this->messageReactionService->store($dto, $employeeData);
     }
 }
