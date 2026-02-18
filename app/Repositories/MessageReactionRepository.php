@@ -11,13 +11,16 @@ class MessageReactionRepository
         ?string $chatTitle,
         int $messageId,
         ?int $employeeId,
+        string $account,
         ?string $reaction
     ): void {
-        $query = MessageReaction::where('chat_id', $chatId)
+        $query = MessageReaction::where('account', $account)
+            ->where('chat_id', $chatId)
             ->where('message_id', $messageId)
             ->where('employee_id', $employeeId);
 
         $data = [
+            'account' => $account,
             'chat_title' => $chatTitle,
             'reaction' => $reaction,
         ];
@@ -26,6 +29,7 @@ class MessageReactionRepository
             $existing->update($data);
         } else {
             $data = array_merge($data, [
+                'account' => $account,
                 'chat_id' => $chatId,
                 'message_id' => $messageId,
                 'employee_id' => $employeeId,
@@ -36,9 +40,10 @@ class MessageReactionRepository
     }
 
 
-    public function delete(int|string $chatId, int $messageId): void
+    public function delete(int|string $chatId, int $messageId, string $account): void
     {
-        MessageReaction::where('chat_id', $chatId)
+        MessageReaction::where('account', $account)
+            ->where('chat_id', $chatId)
             ->where('message_id', $messageId)
             ->delete();
     }

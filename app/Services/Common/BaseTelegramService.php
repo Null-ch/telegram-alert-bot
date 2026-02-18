@@ -666,10 +666,10 @@ class BaseTelegramService implements TelegramServiceInterface
         }
 
         if (empty($dto->getNewReactions())) {
-            $this->messageReactionService->delete($dto);
+            $this->messageReactionService->delete($dto, $currentAccount);
             return;
         }
 
-        $this->messageReactionService->store($dto, $employeeData);
+        $this->messageReactionService->store($dto, $currentAccount, $employeeData);
     }
 }

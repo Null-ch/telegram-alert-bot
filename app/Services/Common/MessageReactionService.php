@@ -18,7 +18,7 @@ class MessageReactionService
         $this->messageReactionRepository = $messageReactionRepository;
     }
 
-    public function store(MessageReactionDTO $dto, ?EmployeeDTO $employee = null): void
+    public function store(MessageReactionDTO $dto, string $account, ?EmployeeDTO $employee = null): void
     {
         try {
             $chatId = $dto->getChatId();
@@ -48,6 +48,7 @@ class MessageReactionService
                 $chatTitle,
                 $messageId,
                 $employeeId,
+                $account,
                 $reactionValue
             );
         } catch (Throwable $e) {
@@ -55,7 +56,7 @@ class MessageReactionService
         }
     }
 
-    public function delete(MessageReactionDTO $dto): void
+    public function delete(MessageReactionDTO $dto, string $account): void
     {
         try {
             $chatId = $dto->getChatId();
@@ -67,7 +68,8 @@ class MessageReactionService
 
             $this->messageReactionRepository->delete(
                 $chatId,
-                $messageId
+                $messageId,
+                $account
             );
         } catch (Throwable $e) {
             Log::error("Error when delete message reaction: {$e->getMessage()}", $e->getTrace());

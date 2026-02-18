@@ -16,6 +16,7 @@ class MessageReaction extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'account',
         'chat_id',
         'chat_title',
         'message_id',

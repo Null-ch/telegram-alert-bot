@@ -51,6 +51,7 @@ class MessageReactionResource extends ModelResource
     {
         return [
             ID::make()->sortable(),
+            Text::make(__('Аккаунт'), 'account'),
             Text::make(__('Сотрудник (ФИО)'), 'employee_id', static fn (MessageReaction $reaction): string => $reaction->employee
                 ? trim(($reaction->employee->last_name ?? '') . ' ' . ($reaction->employee->first_name ?? ''))
                 : ''
