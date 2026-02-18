@@ -9,6 +9,7 @@ use App\DTO\ApiResponseDTO;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\DTO\MessageReactionDTO;
 use Telegram\Bot\Objects\Update;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -54,7 +55,6 @@ class BaseTelegramService implements TelegramServiceInterface
         $token = $this->getToken($prefix);
         $telegramApiUrl = $this->getTelegramApiUrl($token, 'setWebhook');
         $webhookUrl = $this->getWebhookUrl($prefix);
-        // $response = $this->client->request('GET', $telegramApiUrl . $webhookUrl);
 
         $response = $this->client->request('POST', $telegramApiUrl, [
             'json' => [
@@ -361,6 +361,11 @@ class BaseTelegramService implements TelegramServiceInterface
         return isset($response['business_message']);
     }
 
+    public function isReaction(Update|array $response): bool
+    {
+        return isset($response['message_reaction']);
+    }
+
     public function getMessage(Update|array $response): ?array
     {
         if ($this->isBusinessMessage($response)) {
@@ -638,5 +643,10 @@ class BaseTelegramService implements TelegramServiceInterface
             'multipart' => $multipart,
             'parse_mode' => "markdown"
         ]);
+    }
+
+    public function handleReaction(MessageReactionDTO $dto, string $currentAccount)
+    {
+        return;
     }
 }

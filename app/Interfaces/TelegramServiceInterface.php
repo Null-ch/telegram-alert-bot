@@ -64,4 +64,6 @@ interface TelegramServiceInterface
     public function isMessage(Update|array $response): bool;
 
     public function isIgnored(int|string $id): bool;
+
+    public function isReaction(Update|array $response): bool;
 }
