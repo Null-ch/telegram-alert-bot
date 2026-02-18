@@ -52,7 +52,7 @@ class BaseTelegramService implements TelegramServiceInterface
     public function setWebhook(string $prefix): ApiResponseDTO
     {
         $token = $this->getToken($prefix);
-        $telegramApiUrl = $this->getTelegramApiUrl($token, 'setWebhook');
+        $telegramApiUrl = $this->getTelegramApiUrl($token, 'set');
         $webhookUrl = $this->getWebhookUrl($prefix);
 
         $response = $this->client->request('POST', $telegramApiUrl, [
