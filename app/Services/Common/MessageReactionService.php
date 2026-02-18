@@ -54,6 +54,26 @@ class MessageReactionService
             Log::error("Error when store message reaction: {$e->getMessage()}", $e->getTrace());
         }
     }
+
+    public function delete(MessageReactionDTO $dto): void
+    {
+        try {
+            $chatId = $dto->getChatId();
+            $messageId = $dto->getMessageId();
+
+            if ($chatId === null || $messageId === null) {
+                return;
+            }
+
+            $this->messageReactionRepository->delete(
+                $chatId,
+                $messageId
+            );
+        } catch (Throwable $e) {
+            Log::error("Error when delete message reaction: {$e->getMessage()}", $e->getTrace());
+        }
+    }
+
 }
 
 

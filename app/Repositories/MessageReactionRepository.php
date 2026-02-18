@@ -34,4 +34,12 @@ class MessageReactionRepository
             MessageReaction::create($data);
         }
     }
+
+
+    public function delete(int|string $chatId, int $messageId): void
+    {
+        MessageReaction::where('chat_id', $chatId)
+            ->where('message_id', $messageId)
+            ->delete();
+    }
 }
