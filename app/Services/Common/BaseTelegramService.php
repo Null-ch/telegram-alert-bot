@@ -52,7 +52,7 @@ class BaseTelegramService implements TelegramServiceInterface
     public function setWebhook(string $prefix): ApiResponseDTO
     {
         $token = $this->getToken($prefix);
-        $telegramApiUrl = $this->getTelegramApiUrl($token, 'set');
+        $telegramApiUrl = $this->getTelegramApiUrl($token, 'setWebhook');
         $webhookUrl = $this->getWebhookUrl($prefix);
         // $response = $this->client->request('GET', $telegramApiUrl . $webhookUrl);
 
@@ -77,7 +77,7 @@ class BaseTelegramService implements TelegramServiceInterface
     public function removeWebhook(string $prefix): ApiResponseDTO
     {
         $token = $this->getToken($prefix);
-        $telegramApiUrl = $this->getTelegramApiUrl($token, 'remove');
+        $telegramApiUrl = $this->getTelegramApiUrl($token, 'deleteWebhook');
         $response = $this->client->request('GET', $telegramApiUrl);
         return $this->responseProcessing($response);
     }
@@ -96,16 +96,9 @@ class BaseTelegramService implements TelegramServiceInterface
         };
     }
 
-    public function getTelegramApiUrl(string $token, string $type): ?string
+    public function getTelegramApiUrl(string $token, string $method): string
     {
-        if ($type == 'set') {
-            return 'https://api.telegram.org/bot' . $token . '/setWebhook?url=';
-        }
-        if ($type == 'remove') {
-            return 'https://api.telegram.org/bot' . $token . '/deleteWebhook';
-        }
-
-        return null;
+        return 'https://api.telegram.org/bot' . $token . '/' . $method;
     }
 
     public function getWebhookUrl(string $prefix): string
