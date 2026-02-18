@@ -3,6 +3,7 @@
 namespace App\Services\Telegram;
 
 use Illuminate\Http\Request;
+use App\DTO\MessageReactionDTO;
 use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Laravel\Facades\Telegram;
 use App\Services\Common\BaseTelegramService;
@@ -16,6 +17,13 @@ class TelegramBotMoService extends BaseTelegramService
             $response = Telegram::bot('botMo')->getWebhookUpdates();
             $currentChatId = $this->getAdminChatId();
             // $this->handleMessage($response, '@HelpdeskTerminal'); //деактивировано за ненадобностью в текущем проекте
+
+            if ($this->isReaction($response)) {
+                $data = $response->toArray();
+                $reactionDTO = new MessageReactionDTO($data);
+                $this->handleReaction($reactionDTO, 'test');
+                return;
+            }
 
             if ($this->isBusinessMessage($response)) {
                 $message = $this->handleBusinessMessage($response, '@HelpDesk_MO');
