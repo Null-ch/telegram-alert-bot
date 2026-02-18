@@ -14,14 +14,15 @@ class TelegramBotTestService extends BaseTelegramService
     public function handleWebhook(Request $request): void
     {
         try {
-            $response = Telegram::bot('test')->getWebhookUpdates();
-            Log::info(json_encode($response));
-            if ($this->isReaction($response)) {
-                $reactionDTO = new MessageReactionDTO($response);
+            $update = Telegram::bot('test')->getWebhookUpdates();
+            $data = $update->toArray();
+            Log::info(json_encode($data));
+    
+            if ($this->isReaction($update)) {
+                $reactionDTO = new MessageReactionDTO($data);
                 $this->handleReaction($reactionDTO, 'test');
                 return;
             }
-
         } catch (\Exception $e) {
             // $error = $e->getMessage();
             // $errorMessage = "Ошибка: $error\n";
