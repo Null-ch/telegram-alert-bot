@@ -56,6 +56,7 @@ final class MoonShineLayout extends AppLayout
                 MenuItem::make('Отчеты', ReportsResource::class),
                 MenuItem::make('Пользователи', ClientResource::class),
                 MenuItem::make('Игнор-лист', IgnoreListResource::class),
+                MenuItem::make('Отработка обращений', MessageReactionResource::class),
                 MenuGroup::make('Рассылки', [
                     MenuItem::make('Рассылки', MailingResource::class),
                     MenuItem::make('Групповые чаты', GroupChatResource::class),
