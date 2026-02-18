@@ -54,12 +54,7 @@ class BaseTelegramService implements TelegramServiceInterface
         $token = $this->getToken($prefix);
         $telegramApiUrl = $this->getTelegramApiUrl($token, 'set');
         $webhookUrl = $this->getWebhookUrl($prefix);
-
-        $response = $this->client->request('POST', $telegramApiUrl, [
-            'json' => [
-                'url' => $webhookUrl,
-            ],
-        ]);
+        $response = $this->client->request('GET', $telegramApiUrl . $webhookUrl);
 
         return $this->responseProcessing($response);
     }
