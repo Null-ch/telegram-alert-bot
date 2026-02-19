@@ -19,4 +19,4 @@ Schedule::command('app:weather')
 Schedule::command('app:weekly-reaction-stats')
     ->timezone('Europe/Moscow')
     ->sundays()
-    ->at('23:00');
+    ->at('21:00');
