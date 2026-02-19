@@ -35,7 +35,6 @@ class WeeklyReactionStats extends Command
 
         $this->info("Сбор статистики за период: {$startOfWeek->format('d.m.Y')} - {$endOfWeek->format('d.m.Y')}");
 
-        // Собираем статистику по реакциям за неделю
         $stats = MessageReaction::whereBetween('created_at', [$startOfWeek, $endOfWeek])
             ->with('employee')
             ->get()
@@ -62,11 +61,11 @@ class WeeklyReactionStats extends Command
             ->toArray();
 
         if (empty($stats)) {
-            $message = "📊 Статистика реакций за неделю\n\n";
+            $message = "📊 Статистика по заявкам за неделю\n\n";
             $message .= "Период: {$startOfWeek->format('d.m.Y')} - {$endOfWeek->format('d.m.Y')}\n\n";
-            $message .= "За этот период реакций не было.";
+            $message .= "За этот период нет отработанных заявок.";
         } else {
-            $message = "📊 Статистика реакций за неделю\n\n";
+            $message = "📊 Статистика по заявкам за неделю\n\n";
             $message .= "Период: {$startOfWeek->format('d.m.Y')} - {$endOfWeek->format('d.m.Y')}\n\n";
             
             foreach ($stats as $index => $stat) {
