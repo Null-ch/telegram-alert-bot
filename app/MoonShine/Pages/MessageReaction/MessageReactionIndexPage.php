@@ -34,12 +34,13 @@ class MessageReactionIndexPage extends IndexPage
             ActionButton::make('Экспорт данных', '#')
                 ->primary()
                 ->icon('heroicons.download')
-                ->customAttributes(['data-export-url' => $exportRoute])
-                ->onClick('exportMessageReactions(this)'),
+                ->customAttributes([
+                    'onclick' => "exportMessageReactions('{$exportRoute}'); return false;",
+                    'style' => 'cursor: pointer;'
+                ]),
             Raw::make(<<<JS
                 <script>
-                    function exportMessageReactions(button) {
-                        const exportUrl = button.getAttribute('data-export-url');
+                    function exportMessageReactions(exportUrl) {
                         const urlParams = new URLSearchParams(window.location.search);
                         const fullUrl = new URL(exportUrl, window.location.origin);
                         
