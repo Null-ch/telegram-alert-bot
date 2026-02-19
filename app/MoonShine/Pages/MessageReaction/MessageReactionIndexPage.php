@@ -31,9 +31,9 @@ class MessageReactionIndexPage extends IndexPage
         
         return [
             Raw::make(<<<HTML
-                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <div>
             HTML),
-            ...parent::topLayer(),
             ActionButton::make('Экспорт данных', '#')
                 ->primary()
                 ->customAttributes([
@@ -41,6 +41,12 @@ class MessageReactionIndexPage extends IndexPage
                     'style' => 'cursor: pointer;'
                 ]),
             Raw::make(<<<HTML
+                    </div>
+                    <div>
+            HTML),
+            ...parent::topLayer(),
+            Raw::make(<<<HTML
+                    </div>
                 </div>
             HTML),
             Raw::make(<<<JS
