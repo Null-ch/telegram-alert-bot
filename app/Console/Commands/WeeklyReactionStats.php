@@ -1,0 +1,100 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Models\MessageReaction;
+use App\Models\Employee;
+use Illuminate\Console\Command;
+use Carbon\Carbon;
+use GuzzleHttp\Client;
+
+class WeeklyReactionStats extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'app:weekly-reaction-stats';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Собирает статистику по реакциям за текущую неделю и отправляет в Telegram чат';
+
+    /**
+     * Execute the console command.
+     */
+    public function handle()
+    {
+        // Определяем начало и конец текущей недели (понедельник - воскресенье)
+        $startOfWeek = Carbon::now()->startOfWeek(Carbon::MONDAY);
+        $endOfWeek = Carbon::now()->endOfWeek(Carbon::SUNDAY);
+
+        $this->info("Сбор статистики за период: {$startOfWeek->format('d.m.Y')} - {$endOfWeek->format('d.m.Y')}");
+
+        // Собираем статистику по реакциям за неделю
+        $stats = MessageReaction::whereBetween('created_at', [$startOfWeek, $endOfWeek])
+            ->with('employee')
+            ->get()
+            ->groupBy('employee_id')
+            ->map(function ($reactions) {
+                $firstReaction = $reactions->first();
+                $employee = $firstReaction->employee;
+                
+                if ($employee) {
+                    $name = trim(($employee->first_name ?? '') . ' ' . ($employee->last_name ?? ''));
+                    $name = $name ?: ($employee->tag ?? 'Без имени');
+                } else {
+                    $name = 'Неизвестный сотрудник';
+                }
+                
+                return [
+                    'name' => $name,
+                    'count' => $reactions->count()
+                ];
+            })
+            ->values()
+            ->sortByDesc('count')
+            ->values()
+            ->toArray();
+
+        if (empty($stats)) {
+            $message = "📊 Статистика реакций за неделю\n\n";
+            $message .= "Период: {$startOfWeek->format('d.m.Y')} - {$endOfWeek->format('d.m.Y')}\n\n";
+            $message .= "За этот период реакций не было.";
+        } else {
+            $message = "📊 Статистика реакций за неделю\n\n";
+            $message .= "Период: {$startOfWeek->format('d.m.Y')} - {$endOfWeek->format('d.m.Y')}\n\n";
+            
+            foreach ($stats as $index => $stat) {
+                $message .= ($index + 1) . ". {$stat['name']} - {$stat['count']} шт.\n";
+            }
+        }
+
+        // Отправляем сообщение в Telegram
+        $chatId = '-1002474532592';
+        $botToken = env('TELEGRAM_TEST_BOT_TOKEN');
+
+        try {
+            $client = new Client();
+            $client->post("https://api.telegram.org/bot{$botToken}/sendMessage", [
+                'form_params' => [
+                    'chat_id' => $chatId,
+                    'text' => $message,
+                    'parse_mode' => 'HTML'
+                ]
+            ]);
+
+            $this->info('Статистика успешно отправлена в Telegram!');
+        } catch (\Exception $e) {
+            $this->error('Ошибка при отправке статистики: ' . $e->getMessage());
+            return 1;
+        }
+
+        return 0;
+    }
+}
+

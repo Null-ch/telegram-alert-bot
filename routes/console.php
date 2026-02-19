@@ -15,3 +15,8 @@ Schedule::command('app:weather')
 Schedule::command('app:weather')
     ->timezone('Europe/Moscow')
     ->dailyAt('16:00');
+
+Schedule::command('app:weekly-reaction-stats')
+    ->timezone('Europe/Moscow')
+    ->sundays()
+    ->at('23:00');
