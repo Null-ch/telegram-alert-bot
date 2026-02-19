@@ -46,14 +46,38 @@ class MessageReactionIndexPage extends IndexPage
             Raw::make(<<<JS
                 <script>
                     function exportMessageReactions(exportUrl) {
-                        const urlParams = new URLSearchParams(window.location.search);
                         const fullUrl = new URL(exportUrl, window.location.origin);
-                        
-                        // Копируем все параметры фильтрации из текущего URL
+
+                        // 1. Собираем параметры из URL текущей страницы
+                        const urlParams = new URLSearchParams(window.location.search);
                         urlParams.forEach((value, key) => {
-                            fullUrl.searchParams.append(key, value);
+                            fullUrl.searchParams.set(key, value);
                         });
-                        
+
+                        // 2. Дополняем значениями из полей фильтра (если не в URL)
+                        const filterInputs = document.querySelectorAll(
+                            'input[name*="created_at"], input[name*="filter"]'
+                        );
+                        filterInputs.forEach(function(input) {
+                            if (input.name && input.value) {
+                                fullUrl.searchParams.set(input.name, input.value);
+                            }
+                        });
+
+                        // 3. Для DateRange: ищем пару from/to и передаём в формате filter[created_at][from/to]
+                        const dateFromInput = document.querySelector(
+                            'input[name="filter[created_at][from]"], input[name="filters[created_at][from]"]'
+                        );
+                        const dateToInput = document.querySelector(
+                            'input[name="filter[created_at][to]"], input[name="filters[created_at][to]"]'
+                        );
+                        if (dateFromInput && dateFromInput.value) {
+                            fullUrl.searchParams.set('filter[created_at][from]', dateFromInput.value);
+                        }
+                        if (dateToInput && dateToInput.value) {
+                            fullUrl.searchParams.set('filter[created_at][to]', dateToInput.value);
+                        }
+
                         window.location.href = fullUrl.toString();
                     }
                 </script>

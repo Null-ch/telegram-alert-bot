@@ -70,9 +70,9 @@ class AdminController extends Controller
     {
         $query = MessageReaction::with('employee');
 
-        $filters = $request->get('filters', []);
-        $dateFrom = $filters['created_at']['from'] ?? $filters['created_at'][0] ?? null;
-        $dateTo = $filters['created_at']['to'] ?? $filters['created_at'][1] ?? null;
+        $dateFrom = $this->extractDateFromFilter($request);
+        $dateTo = $this->extractDateToFilter($request);
+
         if ($dateFrom) {
             $query->where('created_at', '>=', Carbon::parse($dateFrom)->startOfDay());
         }
@@ -102,4 +102,46 @@ class AdminController extends Controller
     }
 
     public function test(Request $request) {}
+
+    /**
+     * Извлекает дату "от" из параметров фильтра (поддержка разных форматов MoonShine).
+     */
+    private function extractDateFromFilter(Request $request): ?string
+    {
+        $filters = $request->get('filters', $request->get('filter', []));
+        $createdAt = $filters['created_at'] ?? null;
+
+        if (is_array($createdAt)) {
+            return $createdAt['from'] ?? $createdAt[0] ?? null;
+        }
+
+        if (is_string($createdAt) && str_contains($createdAt, ' - ')) {
+            $parts = explode(' - ', $createdAt, 2);
+
+            return trim($parts[0] ?? '') ?: null;
+        }
+
+        return $request->get('created_at_from') ?? $request->get('from');
+    }
+
+    /**
+     * Извлекает дату "до" из параметров фильтра (поддержка разных форматов MoonShine).
+     */
+    private function extractDateToFilter(Request $request): ?string
+    {
+        $filters = $request->get('filters', $request->get('filter', []));
+        $createdAt = $filters['created_at'] ?? null;
+
+        if (is_array($createdAt)) {
+            return $createdAt['to'] ?? $createdAt[1] ?? null;
+        }
+
+        if (is_string($createdAt) && str_contains($createdAt, ' - ')) {
+            $parts = explode(' - ', $createdAt, 2);
+
+            return trim($parts[1] ?? '') ?: null;
+        }
+
+        return $request->get('created_at_to') ?? $request->get('to');
+    }
 }
