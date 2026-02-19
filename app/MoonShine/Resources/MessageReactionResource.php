@@ -7,6 +7,7 @@ namespace App\MoonShine\Resources;
 use App\Models\MessageReaction;
 use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\Text;
+use MoonShine\UI\Fields\DateRange;
 use MoonShine\Support\ListOf;
 use MoonShine\Laravel\Pages\Page;
 use MoonShine\Laravel\Enums\Action;
@@ -71,6 +72,13 @@ class MessageReactionResource extends ModelResource
     {
         // Редактирование/создание реакций не требуется
         return [];
+    }
+
+    public function filters(): array
+    {
+        return [
+            DateRange::make('Дата', 'created_at'),
+        ];
     }
 
     protected function activeActions(): ListOf

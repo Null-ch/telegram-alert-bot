@@ -4,23 +4,29 @@ namespace App\Http\Controllers\Web;
 
 use App\Models\Report;
 use App\Models\GroupChat;
+use App\Models\MessageReaction;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\Common\BaseAppealService;
 use App\Services\Common\BaseTelegramService;
+use App\Services\Common\BaseExportService;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class AdminController extends Controller
 {
     public BaseAppealService $baseAppealService;
     public BaseTelegramService $baseTelegramService;
+    public BaseExportService $baseExportService;
 
     public function __construct(
         BaseAppealService $baseAppealService,
         BaseTelegramService $baseTelegramService,
+        BaseExportService $baseExportService,
     ) {
         $this->baseAppealService = $baseAppealService;
         $this->baseTelegramService = $baseTelegramService;
+        $this->baseExportService = $baseExportService;
     }
 
     public function index()
@@ -58,6 +64,51 @@ class AdminController extends Controller
             });
 
         return response()->json($groupChats);
+    }
+
+    public function exportMessageReactions(Request $request): BinaryFileResponse
+    {
+        $query = MessageReaction::with('employee');
+
+        // Получаем фильтры по дате из запроса
+        // MoonShine может передавать параметры в разных форматах
+        $dateFrom = $request->input('created_at.from') 
+            ?? $request->input('created_at[from]')
+            ?? $request->query('created_at.from')
+            ?? $request->query('created_at[from]');
+            
+        $dateTo = $request->input('created_at.to')
+            ?? $request->input('created_at[to]')
+            ?? $request->query('created_at.to')
+            ?? $request->query('created_at[to]');
+
+        if ($dateFrom) {
+            $query->where('created_at', '>=', Carbon::parse($dateFrom)->startOfDay());
+        }
+
+        if ($dateTo) {
+            $query->where('created_at', '<=', Carbon::parse($dateTo)->endOfDay());
+        }
+
+        $reactions = $query->orderBy('created_at', 'desc')->get();
+        $exportArray = $this->baseExportService->prepareMessageReactionsArray($reactions->all());
+
+        if (empty($exportArray)) {
+            // Если данных нет, создаем пустой массив с заголовками
+            $exportArray = [[
+                'ID' => '',
+                'Аккаунт' => '',
+                'Сотрудник (ФИО)' => '',
+                'Сотрудник (тег)' => '',
+                'Дата' => '',
+                'Реакция' => '',
+            ]];
+        }
+
+        $filename = sprintf('message_reactions_%s.xlsx', now()->format('Ymd_His'));
+        $filePath = $this->baseExportService->exportToExcel($exportArray, $filename);
+
+        return response()->download($filePath, $filename)->deleteFileAfterSend(true);
     }
 
     public function test(Request $request) {}

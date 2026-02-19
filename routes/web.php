@@ -10,5 +10,6 @@ Route::get('/', [AdminController::class, 'index'])->name('index');
 Route::post('/handle-form', [AdminController::class, 'sendMailing'])->name('send.mailing');
 Route::post('/reports/generate', [AdminController::class, 'generateReport'])->name('reports.generate');
 Route::get('/reports/download/{id}', [AdminController::class, 'download'])->name('reports.download');
+Route::get('/message-reactions/export', [AdminController::class, 'exportMessageReactions'])->name('message-reactions.export');
 Route::post('/test', [AdminController::class, 'test'])->name('test.test');
 Route::get('/api/group-chats', [AdminController::class, 'getGroupChats']);

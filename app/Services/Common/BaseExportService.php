@@ -43,6 +43,11 @@ class BaseExportService
         $writer = new Xlsx($spreadsheet);
         $directory = storage_path('app/public/reports/');
 
+        // Создаем директорию, если она не существует
+        if (!is_dir($directory)) {
+            mkdir($directory, 0755, true);
+        }
+
         $filePath = $directory . '/' . $filename;
         $writer->save($filePath);
         return $filePath;
@@ -68,5 +73,30 @@ class BaseExportService
     public function createReport(array $data)
     {
         return $this->reportRepository->create($data);
+    }
+
+    public function prepareMessageReactionsArray(array $reactions): array
+    {
+        $exportArray = [];
+        foreach ($reactions as $reaction) {
+            $employeeFullName = '';
+            $employeeTag = '';
+            
+            if ($reaction->employee) {
+                $employeeFullName = trim(($reaction->employee->last_name ?? '') . ' ' . ($reaction->employee->first_name ?? ''));
+                $employeeTag = $reaction->employee->tag ?? '';
+            }
+
+            $exportArray[] = [
+                'ID' => $reaction->id,
+                'Аккаунт' => $reaction->account,
+                'Сотрудник (ФИО)' => $employeeFullName,
+                'Сотрудник (тег)' => $employeeTag,
+                'Дата' => $reaction->created_at ? $reaction->created_at->format('Y-m-d H:i:s') : '',
+                'Реакция' => $reaction->reaction ?? '',
+            ];
+        }
+
+        return $exportArray;
     }
 }
