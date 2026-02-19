@@ -77,7 +77,7 @@ class MessageReactionResource extends ModelResource
     public function filters(): array
     {
         return [
-            DateRange::make('Дата', 'date_range'),
+            DateRange::make('Дата', 'created_at'),
         ];
     }
 
