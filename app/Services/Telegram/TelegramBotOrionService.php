@@ -20,6 +20,7 @@ class TelegramBotOrionService extends BaseTelegramService
 
             if ($this->isReaction($response)) {
                 $data = $response->toArray();
+                Log::info('Data: ' . json_encode($data));
                 $reactionDTO = new MessageReactionDTO($data);
                 $this->handleReaction($reactionDTO, 'OrionTerminal');
                 return;
