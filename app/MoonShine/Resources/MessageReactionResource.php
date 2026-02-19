@@ -86,9 +86,9 @@ class MessageReactionResource extends ModelResource
      * Применение фильтров к запросу
      * Обрабатываем фильтр дат вручную, чтобы избежать ошибки приведения типов
      */
-    protected function withFilters($query)
+    protected function queryBuilderFeatures(): array
     {
-        $query = parent::withFilters($query);
+        $features = parent::queryBuilderFeatures();
         
         $request = request();
         
@@ -112,14 +112,18 @@ class MessageReactionResource extends ModelResource
                  $request->query('date_range[to]') ?? 
                  null;
         
-        if ($dateFrom) {
-            $query->where('created_at', '>=', Carbon::parse($dateFrom)->startOfDay());
-        }
-        if ($dateTo) {
-            $query->where('created_at', '<=', Carbon::parse($dateTo)->endOfDay());
+        if ($dateFrom || $dateTo) {
+            $features[] = function ($query) use ($dateFrom, $dateTo) {
+                if ($dateFrom) {
+                    $query->where('created_at', '>=', Carbon::parse($dateFrom)->startOfDay());
+                }
+                if ($dateTo) {
+                    $query->where('created_at', '<=', Carbon::parse($dateTo)->endOfDay());
+                }
+            };
         }
         
-        return $query;
+        return $features;
     }
 
     protected function activeActions(): ListOf
