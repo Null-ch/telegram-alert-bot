@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+use Carbon\Carbon;
 use App\Models\Report;
 use App\Models\GroupChat;
 use App\Models\MessageReaction;
@@ -69,7 +70,16 @@ class AdminController extends Controller
     {
         $query = MessageReaction::with('employee');
 
-        // Фильтр по дате применяется глобальным scope в модели MessageReaction
+        $filters = $request->get('filters', []);
+        $dateFrom = $filters['created_at']['from'] ?? $filters['created_at'][0] ?? null;
+        $dateTo = $filters['created_at']['to'] ?? $filters['created_at'][1] ?? null;
+        if ($dateFrom) {
+            $query->where('created_at', '>=', Carbon::parse($dateFrom)->startOfDay());
+        }
+        if ($dateTo) {
+            $query->where('created_at', '<=', Carbon::parse($dateTo)->endOfDay());
+        }
+
         $reactions = $query->orderBy('created_at', 'desc')->get();
         $exportArray = $this->baseExportService->prepareMessageReactionsArray($reactions->all());
 
