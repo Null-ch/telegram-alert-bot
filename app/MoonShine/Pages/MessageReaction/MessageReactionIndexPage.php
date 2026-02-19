@@ -30,6 +30,9 @@ class MessageReactionIndexPage extends IndexPage
         $exportRoute = route('message-reactions.export');
         
         return [
+            Raw::make(<<<HTML
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 1rem;">
+            HTML),
             ...parent::topLayer(),
             ActionButton::make('Экспорт данных', '#')
                 ->primary()
@@ -37,6 +40,9 @@ class MessageReactionIndexPage extends IndexPage
                     'onclick' => "exportMessageReactions('{$exportRoute}'); return false;",
                     'style' => 'cursor: pointer;'
                 ]),
+            Raw::make(<<<HTML
+                </div>
+            HTML),
             Raw::make(<<<JS
                 <script>
                     function exportMessageReactions(exportUrl) {

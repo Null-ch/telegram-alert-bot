@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\MoonShine\Resources;
 
+use Carbon\Carbon;
 use App\Models\MessageReaction;
 use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\Text;
@@ -79,6 +80,52 @@ class MessageReactionResource extends ModelResource
         return [
             DateRange::make('Дата', 'created_at'),
         ];
+    }
+
+    /**
+     * Подготовка фильтров перед применением к модели
+     * Исключаем массив дат из автоматического приведения типов
+     */
+    protected function prepareFilters(array $filters): array
+    {
+        $preparedFilters = [];
+        
+        foreach ($filters as $key => $value) {
+            // Если это фильтр created_at и он является массивом (date range)
+            if ($key === 'created_at' && is_array($value)) {
+                // Не добавляем массив в preparedFilters, обработаем его в withFilters
+                continue;
+            }
+            $preparedFilters[$key] = $value;
+        }
+        
+        return parent::prepareFilters($preparedFilters);
+    }
+
+    /**
+     * Применение фильтров к запросу
+     */
+    protected function withFilters($query)
+    {
+        $query = parent::withFilters($query);
+        
+        // Получаем фильтры из запроса
+        $filters = request()->get('filters', []);
+        
+        // Обрабатываем фильтр дат вручную
+        if (isset($filters['created_at']) && is_array($filters['created_at'])) {
+            $dateFrom = $filters['created_at']['from'] ?? null;
+            $dateTo = $filters['created_at']['to'] ?? null;
+            
+            if ($dateFrom) {
+                $query->where('created_at', '>=', Carbon::parse($dateFrom)->startOfDay());
+            }
+            if ($dateTo) {
+                $query->where('created_at', '<=', Carbon::parse($dateTo)->endOfDay());
+            }
+        }
+        
+        return $query;
     }
 
     protected function activeActions(): ListOf
