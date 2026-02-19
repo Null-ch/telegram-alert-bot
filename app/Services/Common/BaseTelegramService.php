@@ -656,9 +656,9 @@ class BaseTelegramService implements TelegramServiceInterface
     {
         $chatId = $dto->getChatId();
         $ids = [
-            '-1002789399874',
-            '-1001952940670',
-            '-1003041371746',
+            -1002789399874,
+            -1001952940670,
+            -1003041371746,
         ];
 
         if (!in_array($chatId, $ids, true)) {
