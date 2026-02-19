@@ -74,7 +74,8 @@ class WeeklyReactionStats extends Command
         }
 
         // Отправляем сообщение в Telegram
-        $chatId = '-1002474532592';
+        $chatId = '-1001550218774';
+        $threadId = 83189;
         $botToken = env('TELEGRAM_TEST_BOT_TOKEN');
 
         try {
@@ -83,7 +84,7 @@ class WeeklyReactionStats extends Command
                 'form_params' => [
                     'chat_id' => $chatId,
                     'text' => $message,
-                    'message_thread_id' => 428,
+                    'message_thread_id' => $threadId,
                     'parse_mode' => 'HTML'
                 ]
             ]);
