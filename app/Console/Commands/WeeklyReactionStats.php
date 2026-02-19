@@ -83,6 +83,7 @@ class WeeklyReactionStats extends Command
                 'form_params' => [
                     'chat_id' => $chatId,
                     'text' => $message,
+                    'message_thread_id' => 428,
                     'parse_mode' => 'HTML'
                 ]
             ]);
