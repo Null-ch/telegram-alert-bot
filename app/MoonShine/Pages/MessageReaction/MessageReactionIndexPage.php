@@ -33,7 +33,6 @@ class MessageReactionIndexPage extends IndexPage
             ...parent::topLayer(),
             ActionButton::make('Экспорт данных', '#')
                 ->primary()
-                ->icon('heroicons.download')
                 ->customAttributes([
                     'onclick' => "exportMessageReactions('{$exportRoute}'); return false;",
                     'style' => 'cursor: pointer;'
