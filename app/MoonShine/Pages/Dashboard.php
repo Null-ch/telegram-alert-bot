@@ -180,12 +180,12 @@ class Dashboard extends Page
                     ]),
                 ], 6),
                 Column::make([
-                    Box::make('Реакции на сообщения за текущий месяц', [
+                    Box::make('Отработано заявок за текущий месяц', [
                         Raw::make($monthTableHtml),
                     ]),
                 ], 6),
                 Column::make([
-                    Box::make('Реакции на сообщения за неделю', [
+                    Box::make('Отработано заявок за неделю', [
                         Raw::make($weekTableHtml),
                     ]),
                 ], 6),
