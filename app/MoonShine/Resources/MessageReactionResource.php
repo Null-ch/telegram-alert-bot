@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\MoonShine\Resources;
 
-use Carbon\Carbon;
 use App\Models\MessageReaction;
 use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\Text;
@@ -80,50 +79,6 @@ class MessageReactionResource extends ModelResource
         return [
             DateRange::make('Дата', 'date_range'),
         ];
-    }
-
-    /**
-     * Применение фильтров к запросу
-     * Обрабатываем фильтр дат вручную, чтобы избежать ошибки приведения типов
-     */
-    protected function queryBuilderFeatures(): array
-    {
-        $features = parent::queryBuilderFeatures();
-        
-        $request = request();
-        
-        // Получаем фильтры из запроса в разных форматах (MoonShine может передавать по-разному)
-        $filters = $request->get('filters', []);
-        
-        // Обрабатываем фильтр дат вручную (используем кастомное имя 'date_range')
-        $dateFrom = $filters['date_range']['from'] ?? 
-                   $filters['date_range'][0] ?? 
-                   $request->input('date_range.from') ?? 
-                   $request->input('date_range[from]') ?? 
-                   $request->query('date_range.from') ?? 
-                   $request->query('date_range[from]') ?? 
-                   null;
-                   
-        $dateTo = $filters['date_range']['to'] ?? 
-                 $filters['date_range'][1] ?? 
-                 $request->input('date_range.to') ?? 
-                 $request->input('date_range[to]') ?? 
-                 $request->query('date_range.to') ?? 
-                 $request->query('date_range[to]') ?? 
-                 null;
-        
-        if ($dateFrom || $dateTo) {
-            $features[] = function ($query) use ($dateFrom, $dateTo) {
-                if ($dateFrom) {
-                    $query->where('created_at', '>=', Carbon::parse($dateFrom)->startOfDay());
-                }
-                if ($dateTo) {
-                    $query->where('created_at', '<=', Carbon::parse($dateTo)->endOfDay());
-                }
-            };
-        }
-        
-        return $features;
     }
 
     protected function activeActions(): ListOf

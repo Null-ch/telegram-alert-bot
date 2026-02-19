@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Web;
 use App\Models\Report;
 use App\Models\GroupChat;
 use App\Models\MessageReaction;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\Common\BaseAppealService;
@@ -70,26 +69,7 @@ class AdminController extends Controller
     {
         $query = MessageReaction::with('employee');
 
-        // Получаем фильтры по дате из запроса
-        // MoonShine может передавать параметры в разных форматах
-        $dateFrom = $request->input('created_at.from') 
-            ?? $request->input('created_at[from]')
-            ?? $request->query('created_at.from')
-            ?? $request->query('created_at[from]');
-            
-        $dateTo = $request->input('created_at.to')
-            ?? $request->input('created_at[to]')
-            ?? $request->query('created_at.to')
-            ?? $request->query('created_at[to]');
-
-        if ($dateFrom) {
-            $query->where('created_at', '>=', Carbon::parse($dateFrom)->startOfDay());
-        }
-
-        if ($dateTo) {
-            $query->where('created_at', '<=', Carbon::parse($dateTo)->endOfDay());
-        }
-
+        // Фильтр по дате применяется глобальным scope в модели MessageReaction
         $reactions = $query->orderBy('created_at', 'desc')->get();
         $exportArray = $this->baseExportService->prepareMessageReactionsArray($reactions->all());
 
