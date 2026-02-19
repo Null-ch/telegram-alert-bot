@@ -78,51 +78,45 @@ class MessageReactionResource extends ModelResource
     public function filters(): array
     {
         return [
-            DateRange::make('Дата', 'created_at'),
+            DateRange::make('Дата', 'date_range'),
         ];
     }
 
     /**
-     * Подготовка фильтров перед применением к модели
-     * Исключаем массив дат из автоматического приведения типов
-     */
-    protected function prepareFilters(array $filters): array
-    {
-        $preparedFilters = [];
-        
-        foreach ($filters as $key => $value) {
-            // Если это фильтр created_at и он является массивом (date range)
-            if ($key === 'created_at' && is_array($value)) {
-                // Не добавляем массив в preparedFilters, обработаем его в withFilters
-                continue;
-            }
-            $preparedFilters[$key] = $value;
-        }
-        
-        return parent::prepareFilters($preparedFilters);
-    }
-
-    /**
      * Применение фильтров к запросу
+     * Обрабатываем фильтр дат вручную, чтобы избежать ошибки приведения типов
      */
     protected function withFilters($query)
     {
         $query = parent::withFilters($query);
         
-        // Получаем фильтры из запроса
-        $filters = request()->get('filters', []);
+        $request = request();
         
-        // Обрабатываем фильтр дат вручную
-        if (isset($filters['created_at']) && is_array($filters['created_at'])) {
-            $dateFrom = $filters['created_at']['from'] ?? null;
-            $dateTo = $filters['created_at']['to'] ?? null;
-            
-            if ($dateFrom) {
-                $query->where('created_at', '>=', Carbon::parse($dateFrom)->startOfDay());
-            }
-            if ($dateTo) {
-                $query->where('created_at', '<=', Carbon::parse($dateTo)->endOfDay());
-            }
+        // Получаем фильтры из запроса в разных форматах (MoonShine может передавать по-разному)
+        $filters = $request->get('filters', []);
+        
+        // Обрабатываем фильтр дат вручную (используем кастомное имя 'date_range')
+        $dateFrom = $filters['date_range']['from'] ?? 
+                   $filters['date_range'][0] ?? 
+                   $request->input('date_range.from') ?? 
+                   $request->input('date_range[from]') ?? 
+                   $request->query('date_range.from') ?? 
+                   $request->query('date_range[from]') ?? 
+                   null;
+                   
+        $dateTo = $filters['date_range']['to'] ?? 
+                 $filters['date_range'][1] ?? 
+                 $request->input('date_range.to') ?? 
+                 $request->input('date_range[to]') ?? 
+                 $request->query('date_range.to') ?? 
+                 $request->query('date_range[to]') ?? 
+                 null;
+        
+        if ($dateFrom) {
+            $query->where('created_at', '>=', Carbon::parse($dateFrom)->startOfDay());
+        }
+        if ($dateTo) {
+            $query->where('created_at', '<=', Carbon::parse($dateTo)->endOfDay());
         }
         
         return $query;
