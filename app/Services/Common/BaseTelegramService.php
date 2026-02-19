@@ -654,6 +654,17 @@ class BaseTelegramService implements TelegramServiceInterface
 
     public function handleReaction(MessageReactionDTO $dto, string $currentAccount): void
     {
+        $chatId = $dto->getChatId();
+        $ids = [
+            '-1002789399874',
+            '-1001952940670',
+            '-1003041371746',
+        ];
+
+        if (!in_array($chatId, $ids, true)) {
+            return;
+        }
+
         $employeeData = $this->baseEmployeeService->getEmployeeByTgId($dto->getUserId());
 
         if (!$employeeData) {
