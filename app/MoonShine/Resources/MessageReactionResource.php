@@ -29,6 +29,12 @@ class MessageReactionResource extends ModelResource
 
     public string $column = 'id';
 
+    protected bool $paginate = true;
+
+    protected int $itemsPerPage = 10;
+
+    protected bool $simplePaginate = true;
+
     /**
      * Eager load relations.
      *
