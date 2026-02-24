@@ -21,7 +21,6 @@ class TelegramBotTestService extends BaseTelegramService
             if ($this->isReaction($update)) {
                 $reactionDTO = new MessageReactionDTO($data);
                 $this->handleReaction($reactionDTO, 'test');
-                return;
             }
         } catch (\Exception $e) {
             // $error = $e->getMessage();

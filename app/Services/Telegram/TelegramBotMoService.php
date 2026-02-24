@@ -22,7 +22,6 @@ class TelegramBotMoService extends BaseTelegramService
                 $data = $response->toArray();
                 $reactionDTO = new MessageReactionDTO($data);
                 $this->handleReaction($reactionDTO, 'TerminalMosreg');
-                return;
             }
 
             if ($this->isBusinessMessage($response)) {

@@ -22,7 +22,6 @@ class TelegramBotInfocurService extends BaseTelegramService
                 $data = $response->toArray();
                 $reactionDTO = new MessageReactionDTO($data);
                 $this->handleReaction($reactionDTO, 'Infocur');
-                return;
             }
 
             if ($this->isBusinessMessage($response)) {
