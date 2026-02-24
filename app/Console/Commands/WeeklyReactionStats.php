@@ -15,7 +15,7 @@ class WeeklyReactionStats extends Command
      *
      * @var string
      */
-    protected $signature = 'app:weekly-reaction-stats';
+    protected $signature = 'app:weekly-reaction-stats {start?} {end?}';
 
     /**
      * The console command description.
@@ -29,9 +29,16 @@ class WeeklyReactionStats extends Command
      */
     public function handle()
     {
-        // Определяем начало и конец текущей недели (понедельник - воскресенье)
-        $startOfWeek = Carbon::now()->startOfWeek(Carbon::MONDAY);
-        $endOfWeek = Carbon::now()->endOfWeek(Carbon::SUNDAY);
+        $startInput = $this->argument('start');
+        $endInput   = $this->argument('end');
+
+        if ($startInput && $endInput) {
+            $startOfWeek = Carbon::parse($startInput)->startOfDay();
+            $endOfWeek   = Carbon::parse($endInput)->endOfDay();
+        } else {
+            $startOfWeek = Carbon::now()->startOfWeek(Carbon::MONDAY);
+            $endOfWeek   = Carbon::now()->endOfWeek(Carbon::SUNDAY);
+        }
 
         $this->info("Сбор статистики за период: {$startOfWeek->format('d.m.Y')} - {$endOfWeek->format('d.m.Y')}");
 
@@ -42,14 +49,14 @@ class WeeklyReactionStats extends Command
             ->map(function ($reactions) {
                 $firstReaction = $reactions->first();
                 $employee = $firstReaction->employee;
-                
+
                 if ($employee) {
                     $name = trim(($employee->first_name ?? '') . ' ' . ($employee->last_name ?? ''));
                     $name = $name ?: ($employee->tag ?? 'Без имени');
                 } else {
                     $name = 'Неизвестный сотрудник';
                 }
-                
+
                 return [
                     'name' => $name,
                     'count' => $reactions->count()
@@ -67,7 +74,7 @@ class WeeklyReactionStats extends Command
         } else {
             $message = "📊 Статистика по заявкам за неделю\n\n";
             $message .= "Период: {$startOfWeek->format('d.m.Y')} - {$endOfWeek->format('d.m.Y')}\n\n";
-            
+
             foreach ($stats as $index => $stat) {
                 $message .= ($index + 1) . ". {$stat['name']} - {$stat['count']} шт.\n";
             }
@@ -98,4 +105,3 @@ class WeeklyReactionStats extends Command
         return 0;
     }
 }
-
