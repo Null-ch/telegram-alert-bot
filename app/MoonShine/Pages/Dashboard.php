@@ -108,7 +108,8 @@ class Dashboard extends Page
             ->values();
 
         // Формируем HTML таблицы для месяца
-        $monthTableHtml = '<table class="table" style="width: 100%; border-collapse: collapse;">
+        $monthTableHtml = '<div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 1rem;">
+            <table class="table" style="width: 100%; border-collapse: collapse;">
             <thead>
                 <tr style="border-bottom: 1px solid #e5e7eb;">
                     <th style="padding: 0.75rem; text-align: left; font-weight: 600;">Сотрудник</th>
@@ -130,10 +131,11 @@ class Dashboard extends Page
             }
         }
         
-        $monthTableHtml .= '</tbody></table>';
+        $monthTableHtml .= '</tbody></table></div>';
 
         // Формируем HTML таблицы для недели
-        $weekTableHtml = '<table class="table" style="width: 100%; border-collapse: collapse;">
+        $weekTableHtml = '<div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 1rem;">
+            <table class="table" style="width: 100%; border-collapse: collapse;">
             <thead>
                 <tr style="border-bottom: 1px solid #e5e7eb;">
                     <th style="padding: 0.75rem; text-align: left; font-weight: 600;">Сотрудник</th>
@@ -155,7 +157,7 @@ class Dashboard extends Page
             }
         }
         
-        $weekTableHtml .= '</tbody></table>';
+        $weekTableHtml .= '</tbody></table></div>';
 
         return [
             Grid::make([
