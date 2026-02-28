@@ -18,6 +18,7 @@ class TelegramBotMoService extends BaseTelegramService
             $currentChatId = $this->getAdminChatId();
             // $this->handleMessage($response, '@HelpdeskTerminal'); //деактивировано за ненадобностью в текущем проекте
 
+            Log::info('MessageData: ' . json_encode($response->toArray()));
             if ($this->isReaction($response)) {
                 $data = $response->toArray();
                 $reactionDTO = new MessageReactionDTO($data);
@@ -26,16 +27,16 @@ class TelegramBotMoService extends BaseTelegramService
 
             if ($this->isBusinessMessage($response)) {
                 $message = $this->handleBusinessMessage($response, '@HelpDesk_MO');
+            }
+
+            if ($this->isPrivate($this->getChatType($response))) {
+                $message = $this->handlePersonalMessage([
+                    'accountName' => 'Helpdesk Terminal МО',
+                    'accountTag' => '@HelpDesk_MO',
+                ]);
+                $currentChatId = $this->getChatId($response);
             } else {
-                if ($this->isPrivate($this->getChatType($response))) {
-                    $message = $this->handlePersonalMessage([
-                        'accountName' => 'Helpdesk Terminal МО',
-                        'accountTag' => '@HelpDesk_MO',
-                    ]);
-                    $currentChatId = $this->getChatId($response);
-                } else {
-                    $message = $this->handleGrouplMessage($response, '@HelpDesk_MO');
-                }
+                $message = $this->handleGrouplMessage($response, '@HelpDesk_MO');
             }
 
             if ($message) {
