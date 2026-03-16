@@ -16,21 +16,26 @@ class TelegramBotMoService extends BaseTelegramService
             $message = null;
             $response = Telegram::bot('botMo')->getWebhookUpdates();
             $currentChatId = $this->getAdminChatId();
+            // $this->handleMessage($response, '@HelpdeskTerminal'); //деактивировано за ненадобностью в текущем проекте
 
             if ($this->isReaction($response)) {
                 $data = $response->toArray();
                 $reactionDTO = new MessageReactionDTO($data);
                 $this->handleReaction($reactionDTO, 'TerminalMosreg');
-            } elseif ($this->isBusinessMessage($response)) {
+            }
+
+            if ($this->isBusinessMessage($response)) {
                 $message = $this->handleBusinessMessage($response, '@HelpDesk_MO');
-            } elseif ($this->isPrivate($this->getChatType($response))) {
-                $message = $this->handlePersonalMessage([
-                    'accountName' => 'Helpdesk Terminal МО',
-                    'accountTag' => '@HelpDesk_MO',
-                ]);
-                $currentChatId = $this->getChatId($response);
-            } elseif ($this->isGroupMessage($response)) {
-                $message = $this->handleGrouplMessage($response, '@HelpDesk_MO');
+            } else {
+                if ($this->isPrivate($this->getChatType($response))) {
+                    $message = $this->handlePersonalMessage([
+                        'accountName' => 'Helpdesk Terminal МО',
+                        'accountTag' => '@HelpDesk_MO',
+                    ]);
+                    $currentChatId = $this->getChatId($response);
+                } else {
+                    $message = $this->handleGrouplMessage($response, '@HelpDesk_MO');
+                }
             }
 
             if ($message) {
