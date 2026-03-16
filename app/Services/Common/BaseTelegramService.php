@@ -66,15 +66,19 @@ class BaseTelegramService implements TelegramServiceInterface
         $response = $this->client->request('POST', $telegramApiUrl, [
             'json' => [
                 'url' => $webhookUrl,
-                // 'allowed_updates' => [
-                //     'message',
-                //     'edited_message',
-                //     'message_reaction',
-                //     'message_reaction_count',
-                //     'callback_query',
-                //     'chat_member',
-                //     'my_chat_member',
-                // ],
+                'allowed_updates' => [
+                    "business_message",
+                    "edited_business_message",
+                    "deleted_business_messages",
+                    "business_connection",
+                    "message",
+                    "edited_message",
+                    "message_reaction",
+                    "message_reaction_count",
+                    "callback_query",
+                    "chat_member",
+                    "my_chat_member",
+                ],
             ],
         ]);
 
