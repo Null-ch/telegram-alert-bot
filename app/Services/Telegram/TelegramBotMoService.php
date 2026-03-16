@@ -33,7 +33,9 @@ class TelegramBotMoService extends BaseTelegramService
                 $currentChatId = $this->getChatId($response);
             } elseif ($this->isGroupMessage($response)) {
                 $message = $this->handleGrouplMessage($response, '@HelpDesk_MO');
-            } elseif ($message) {
+            }
+
+            if ($message) {
                 $this->sendResponse($currentChatId, $message, 'botMo');
             }
         } catch (\Exception $e) {
