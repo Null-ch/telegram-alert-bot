@@ -17,7 +17,7 @@ class TelegramBotTestService extends BaseTelegramService
             $update = Telegram::bot('test')->getWebhookUpdates();
             $data = $update->toArray();
              Log::info('Data: ' . json_encode($data));
-             $this->sendResponse('395590080', 'pivo123', 'botMo');
+             $this->sendResponse('395590080', 'pivo123', 'test');
 
             // if ($this->isReaction($update)) {
             //     $reactionDTO = new MessageReactionDTO($data);
