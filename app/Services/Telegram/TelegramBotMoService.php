@@ -39,7 +39,7 @@ class TelegramBotMoService extends BaseTelegramService
             }
 
             if ($message) {
-                $this->sendResponse($currentChatId, $message, 'botMo');
+                $this->sendMessage($currentChatId, $message, 'botMo');
             }
         } catch (\Exception $e) {
             // $error = $e->getMessage();

@@ -39,7 +39,7 @@ class TelegramBotInfocurService extends BaseTelegramService
             }
 
             if ($message) {
-                $this->sendResponse($currentChatId, $message, 'botInfocur');
+                $this->sendMessage($currentChatId, $message, 'botInfocur');
             }
         } catch (\Exception $e) {
             // $error = $e->getMessage();

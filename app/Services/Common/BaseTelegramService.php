@@ -535,7 +535,7 @@ class BaseTelegramService implements TelegramServiceInterface
         } catch (\Exception $e) {
             $error = $e->getMessage();
             $errorMessage = "Chat ID: {$chatId}, botName {$botName} Ошибка: {$error}\n";
-            $this->sendResponse(env('TELEGRAM_ERROR_ALERT_CHAT_ID'), $errorMessage, 'test');
+            Log::error('Message: ' . $error . ' '. $errorMessage);
         }
     }
 

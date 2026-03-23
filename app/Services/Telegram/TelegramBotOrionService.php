@@ -39,7 +39,7 @@ class TelegramBotOrionService extends BaseTelegramService
             }
 
             if ($message) {
-                $this->sendResponse($currentChatId, $message, 'botOrion');
+                $this->sendMessage($currentChatId, $message, 'botOrion');
             }
         } catch (\Exception $e) {
             // $error = $e->getMessage();
