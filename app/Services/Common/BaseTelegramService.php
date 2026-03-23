@@ -494,10 +494,17 @@ class BaseTelegramService implements TelegramServiceInterface
     {
         try {
             if (Telegram::getChat(['chat_id' => $chatId])) {
-                Telegram::bot($botName)->sendMessage([
+                // Telegram::bot($botName)->sendMessage([
+                //     'chat_id' => $chatId,
+                //     'text' => "$message",
+                // ]);
+                $this->client->post(env('TELEGRAM_BASE_URL') . "/bot{$token}/sendMessage", [
+                'form_params' => [
                     'chat_id' => $chatId,
-                    'text' => "$message",
-                ]);
+                    'text' => $message,
+                    'parse_mode' => 'html'
+                ]
+            ]);
             }
         } finally {
             //
