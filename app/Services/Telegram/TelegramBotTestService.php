@@ -17,7 +17,7 @@ class TelegramBotTestService extends BaseTelegramService
             $update = Telegram::bot('test')->getWebhookUpdates();
             $data = $update->toArray();
              Log::info('Data: ' . json_encode($data));
-             $this->sendResponse('395590080', 'pivo123', 'test');
+             $this->sendResponse('395590080', json_encode($data), 'test');
 
             // if ($this->isReaction($update)) {
             //     $reactionDTO = new MessageReactionDTO($data);
@@ -27,7 +27,7 @@ class TelegramBotTestService extends BaseTelegramService
             // $error = $e->getMessage();
             // $errorMessage = "Ошибка: $error\n";
             // $this->sendResponse(env('TELEGRAM_ERROR_ALERT_CHAT_ID'), $errorMessage, 'test');
-            // Log::error('Message: ' . $error, $e->getTrace());
+            Log::error('Message: ' . $error, $e->getTrace());
         }
     }
 }
