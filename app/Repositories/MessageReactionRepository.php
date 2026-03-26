@@ -14,35 +14,33 @@ class MessageReactionRepository
         string $account,
         ?string $reaction
     ): void {
-        $query = MessageReaction::where('account', $account)
+        $record = MessageReaction::withTrashed()
+            ->where('account', $account)
             ->where('chat_id', $chatId)
             ->where('message_id', $messageId)
-            ->where('employee_id', $employeeId);
+            ->where('employee_id', $employeeId)
+            ->first();
 
-        $data = [
-            'account' => $account,
-            'chat_title' => $chatTitle,
-            'reaction' => $reaction,
-        ];
-
-        if ($existing = $query->first()) {
-            if ($existing->trashed()) {
-                $existing->restore();
+        if ($record) {
+            if ($record->trashed()) {
+                $record->restore();
             }
 
-            $existing->update($data);
+            $record->update([
+                'chat_title' => $chatTitle,
+                'reaction' => $reaction,
+            ]);
         } else {
-            $data = array_merge($data, [
+            MessageReaction::create([
                 'account' => $account,
                 'chat_id' => $chatId,
+                'chat_title' => $chatTitle,
                 'message_id' => $messageId,
                 'employee_id' => $employeeId,
+                'reaction' => $reaction,
             ]);
-
-            MessageReaction::create($data);
         }
     }
-
 
     public function delete(int|string $chatId, int $messageId, string $account): void
     {
