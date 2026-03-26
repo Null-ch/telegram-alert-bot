@@ -26,6 +26,10 @@ class MessageReactionRepository
         ];
 
         if ($existing = $query->first()) {
+            if ($existing->trashed()) {
+                $existing->restore();
+            }
+
             $existing->update($data);
         } else {
             $data = array_merge($data, [
