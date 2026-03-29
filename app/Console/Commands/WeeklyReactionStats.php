@@ -2,11 +2,10 @@
 
 namespace App\Console\Commands;
 
-use App\Models\MessageReaction;
-use App\Models\Employee;
-use Illuminate\Console\Command;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
+use App\Models\MessageReaction;
+use Illuminate\Console\Command;
 
 class WeeklyReactionStats extends Command
 {
@@ -80,14 +79,13 @@ class WeeklyReactionStats extends Command
             }
         }
 
-        // Отправляем сообщение в Telegram
         $chatId = '-1001550218774';
         $threadId = 83189;
         $botToken = env('TELEGRAM_TEST_BOT_TOKEN');
 
         try {
             $client = new Client();
-            $client->post("https://api.telegram.org/bot{$botToken}/sendMessage", [
+            $client->post(env('TELEGRAM_BASE_URL') . "/bot{$botToken}/sendMessage", [
                 'form_params' => [
                     'chat_id' => $chatId,
                     'text' => $message,
