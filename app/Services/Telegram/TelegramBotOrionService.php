@@ -13,6 +13,9 @@ class TelegramBotOrionService extends BaseTelegramService
     public function handleWebhook(Request $request): void
     {
         try {
+            $update = Telegram::bot('orion')->getWebhookUpdates();
+            $data1 = $update->toArray();
+            Log::info('Data: ' . json_encode($data1));
             $message = null;
             $response = Telegram::bot('botOrion')->getWebhookUpdates();
             $currentChatId = $this->getAdminChatId();
