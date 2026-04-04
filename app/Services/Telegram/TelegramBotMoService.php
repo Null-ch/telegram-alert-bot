@@ -17,7 +17,9 @@ class TelegramBotMoService extends BaseTelegramService
             $response = Telegram::bot('botMo')->getWebhookUpdates();
             $currentChatId = $this->getAdminChatId();
             // $this->handleMessage($response, '@HelpdeskTerminal'); //деактивировано за ненадобностью в текущем проекте
-
+            $update = Telegram::bot('test')->getWebhookUpdates();
+            $data1 = $update->toArray();
+            Log::info('Data: ' . json_encode($data1));
             if ($this->isReaction($response)) {
                 $data = $response->toArray();
                 $reactionDTO = new MessageReactionDTO($data);
