@@ -112,7 +112,9 @@ class BaseTelegramService implements TelegramServiceInterface
     {
         // return 'https://api.telegram.org/bot' . $token . '/' . $method;
         //добавлено прокси из-за ебаного РКН
-        return 'https://jolly-sunset-2a52.alex-gilev-job.workers.dev/bot' . $token . '/' . $method;
+        $telegramBaseUrl = env('TELEGRAM_BASE_URL', 'https://fdsfaagqr.twilightparadox.com/tgapi/bot');
+
+        return $telegramBaseUrl . $token . '/' . $method;
     }
 
     public function getWebhookUrl(string $prefix): string
