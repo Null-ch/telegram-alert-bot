@@ -46,7 +46,12 @@ class BaseTelegramService implements TelegramServiceInterface
         BaseEmployeeService $baseEmployeeService,
         MessageReactionService $messageReactionService,
     ) {
-        $this->client = new Client;
+        $this->client = new Client([
+            'timeout' => 30,
+            'connect_timeout' => 10,
+            'read_timeout' => 30,
+            'verify' => true,
+        ]);
         $this->baseAppealService = $baseAppealService;
         $this->baseClientService = $baseClientService;
         $this->baseIgnoreListService = $baseIgnoreListService;
@@ -504,10 +509,10 @@ class BaseTelegramService implements TelegramServiceInterface
                 ]
             ]);
             // if (Telegram::getChat(['chat_id' => $chatId])) {
-                // Telegram::bot($botName)->sendMessage([
-                //     'chat_id' => $chatId,
-                //     'text' => "$message",
-                // ]);
+            // Telegram::bot($botName)->sendMessage([
+            //     'chat_id' => $chatId,
+            //     'text' => "$message",
+            // ]);
             // }
         } finally {
             //
@@ -538,7 +543,7 @@ class BaseTelegramService implements TelegramServiceInterface
         } catch (\Exception $e) {
             $error = $e->getMessage();
             $errorMessage = "Chat ID: {$chatId}, botName {$botName} Ошибка: {$error}\n";
-            Log::error('Message: ' . $error . ' '. $errorMessage);
+            Log::error('Message: ' . $error . ' ' . $errorMessage);
         }
     }
 
