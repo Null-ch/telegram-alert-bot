@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\MoonShine\Resources;
 
+use App\Enums\BotName;
 use App\Models\GroupChat;
 use MoonShine\UI\Fields\ID;
 use MoonShine\Support\ListOf;
@@ -42,12 +43,8 @@ class GroupChatResource extends ModelResource
         return [
             ID::make()->sortable(),
             Select::make('Аккаунт', 'account')
-                ->options([
-                    'botInfocur' => 'Терминал - инфоцур (регионы)',
-                    'botMo' => 'Терминал - мосрег (МО)',
-                    'botOrion' => 'Терминал - орион (калуга)',
-                    'test' => 'Тестовый',
-                ])->required(),
+                ->options(BotName::options())
+                ->required(),
             Text::make(__('Название чата'), 'title')->required(),
             Text::make(__('ID чата'), 'chat_id')->required(),
         ];

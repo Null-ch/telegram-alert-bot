@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class GroupChat extends Model
+class ChatGroup extends Model
 {
     use HasFactory, SoftDeletes;
     /**
@@ -18,14 +18,13 @@ class GroupChat extends Model
     protected $fillable = [
         'account',
         'title',
-        'chat_id',
     ];
 
-    protected $table = 'group_chats';
+    protected $table = 'chat_groups';
     protected $guarded = false;
 
-    public function chatGroups(): BelongsToMany
+    public function groupChats(): BelongsToMany
     {
-        return $this->belongsToMany(ChatGroup::class, 'chat_group_group_chat')->withTimestamps();
+        return $this->belongsToMany(GroupChat::class, 'chat_group_group_chat')->withTimestamps();
     }
 }

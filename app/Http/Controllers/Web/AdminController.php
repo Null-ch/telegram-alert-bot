@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Services\Common\BaseAppealService;
 use App\Services\Common\BaseTelegramService;
 use App\Services\Common\BaseExportService;
+use App\Services\Common\BaseChatGroupService;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class AdminController extends Controller
@@ -18,15 +19,18 @@ class AdminController extends Controller
     public BaseAppealService $baseAppealService;
     public BaseTelegramService $baseTelegramService;
     public BaseExportService $baseExportService;
+    public BaseChatGroupService $baseChatGroupService;
 
     public function __construct(
         BaseAppealService $baseAppealService,
         BaseTelegramService $baseTelegramService,
         BaseExportService $baseExportService,
+        BaseChatGroupService $baseChatGroupService,
     ) {
         $this->baseAppealService = $baseAppealService;
         $this->baseTelegramService = $baseTelegramService;
         $this->baseExportService = $baseExportService;
+        $this->baseChatGroupService = $baseChatGroupService;
     }
 
     public function index()
@@ -64,6 +68,35 @@ class AdminController extends Controller
             });
 
         return response()->json($groupChats);
+    }
+
+    public function getChatGroups(Request $request)
+    {
+        $account = $request->query('account');
+
+        $chatGroups = collect($this->baseChatGroupService->getByAccount($account))
+            ->mapWithKeys(fn ($chatGroup) => [$chatGroup->id => $chatGroup->title]);
+
+        return response()->json($chatGroups);
+    }
+
+    public function getChatGroupChats(int $id)
+    {
+        return response()->json($this->baseChatGroupService->getGroupChatIds($id));
+    }
+
+    public function storeChatGroup(Request $request)
+    {
+        $this->baseChatGroupService->create($request->all());
+
+        return redirect('admin/resource/chat-group-resource/chat-group-index-page');
+    }
+
+    public function updateChatGroup(Request $request, int $id)
+    {
+        $this->baseChatGroupService->update($id, $request->all());
+
+        return redirect('admin/resource/chat-group-resource/chat-group-index-page');
     }
 
     public function exportMessageReactions(Request $request): BinaryFileResponse

@@ -13,3 +13,7 @@ Route::get('/reports/download/{id}', [AdminController::class, 'download'])->name
 Route::get('/message-reactions/export', [AdminController::class, 'exportMessageReactions'])->name('message-reactions.export');
 Route::post('/test', [AdminController::class, 'test'])->name('test.test');
 Route::get('/api/group-chats', [AdminController::class, 'getGroupChats']);
+Route::get('/api/chat-groups', [AdminController::class, 'getChatGroups']);
+Route::get('/api/chat-groups/{id}/chats', [AdminController::class, 'getChatGroupChats']);
+Route::post('/chat-groups', [AdminController::class, 'storeChatGroup'])->name('chat-groups.store');
+Route::post('/chat-groups/{id}', [AdminController::class, 'updateChatGroup'])->name('chat-groups.update');

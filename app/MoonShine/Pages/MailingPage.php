@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\MoonShine\Pages;
 
+use App\Enums\BotName;
 use MoonShine\UI\Fields\File;
 use MoonShine\AssetManager\Raw;
 use MoonShine\Support\AlpineJs;
@@ -43,19 +44,21 @@ class MailingPage extends Page
                     Raw::make(view('admin.scripts.mailing-js')->render()),
                     File::make('Добавить файл')->customAttributes(['name' => 'file']),
                     Select::make('Аккаунт', 'account')
-                        ->options([
-                            '' => 'Выберите аккаунт',
-                            'test' => 'Тестовый',
-                            'botInfocur' => 'Терминал - инфоцур (регионы)',
-                            'botMo' => 'Терминал - мосрег (МО)',
-                            'botOrion' => 'Терминал - орион (калуга)',
-                        ])
+                        ->options(BotName::options(withPlaceholder: true))
                         ->required()
                         ->customAttributes(['id' => 'account-select'])
                         ->onChangeEvent(
                             AlpineJs::event(JsEvent::FRAGMENT_UPDATED, 'selects'),
                             exclude: ['message', 'file']
                         ),
+                    Select::make('Группа чатов', 'chat_group_id')
+                        ->options([])
+                        ->native()
+                        ->customAttributes([
+                            'id' => 'chatGroupSelect',
+                            'disabled' => 'disabled',
+                            'class' => 'custom-select-single',
+                        ]),
                     Select::make('Выбор чатов', 'chat_ids')
                         ->options([])
                         ->multiple()

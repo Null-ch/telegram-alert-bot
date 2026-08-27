@@ -5,33 +5,28 @@ declare(strict_types=1);
 namespace App\MoonShine\Resources;
 
 use App\Enums\BotName;
-use App\Models\Mailing;
+use App\Models\ChatGroup;
 use MoonShine\UI\Fields\ID;
 use MoonShine\Support\ListOf;
 use MoonShine\UI\Fields\Text;
-use MoonShine\UI\Fields\Email;
-use MoonShine\Support\AlpineJs;
 use MoonShine\UI\Fields\Select;
 use MoonShine\Laravel\Pages\Page;
 use MoonShine\Laravel\Enums\Action;
-use App\MoonShine\Pages\MailingPage;
-use MoonShine\Support\Enums\JsEvent;
-use MoonShine\UI\Components\FormBuilder;
 use MoonShine\UI\Components\ActionButton;
 use MoonShine\Laravel\Resources\ModelResource;
-use App\MoonShine\Pages\Mailing\MailingFormPage;
 use MoonShine\Contracts\UI\ActionButtonContract;
-use App\MoonShine\Pages\Mailing\MailingIndexPage;
-use App\MoonShine\Pages\Mailing\MailingDetailPage;
+use App\MoonShine\Pages\ChatGroup\ChatGroupFormPage;
+use App\MoonShine\Pages\ChatGroup\ChatGroupIndexPage;
+use App\MoonShine\Pages\ChatGroup\ChatGroupDetailPage;
 
 /**
- * @extends ModelResource<Mailing, MailingIndexPage, MailingFormPage, MailingDetailPage>
+ * @extends ModelResource<ChatGroup, ChatGroupIndexPage, ChatGroupFormPage, ChatGroupDetailPage>
  */
-class MailingResource extends ModelResource
+class ChatGroupResource extends ModelResource
 {
-    protected string $model = Mailing::class;
+    protected string $model = ChatGroup::class;
 
-    protected string $title = 'Рассылки';
+    protected string $title = 'Группы чатов';
 
     /**
      * @return list<Page>
@@ -39,19 +34,20 @@ class MailingResource extends ModelResource
     protected function pages(): array
     {
         return [
-            MailingIndexPage::class,
-            MailingFormPage::class,
-            MailingDetailPage::class,
+            ChatGroupIndexPage::class,
+            ChatGroupFormPage::class,
+            ChatGroupDetailPage::class,
         ];
     }
 
     protected function indexFields(): iterable
     {
         return [
-            Text::make('Сообщение', 'message')->required(),
+            ID::make()->sortable(),
             Select::make('Аккаунт', 'account')
-                ->options(BotName::options(withPlaceholder: true))
+                ->options(BotName::options())
                 ->required(),
+            Text::make('Название', 'title')->required(),
         ];
     }
 
@@ -67,16 +63,21 @@ class MailingResource extends ModelResource
 
     protected function activeActions(): ListOf
     {
-        return parent::activeActions()->except(Action::DELETE)->except(Action::UPDATE)->except(Action::CREATE);
+        return parent::activeActions()->except(Action::CREATE)->except(Action::UPDATE);
     }
 
     protected function modifyCreateButton(ActionButtonContract $button): ActionButtonContract
     {
-        return ActionButton::make('Создать', '/admin/page/mailing-page');
+        return ActionButton::make('Создать', '/admin/page/chat-group-page');
+    }
+
+    protected function modifyUpdateButton(ActionButtonContract $button): ActionButtonContract
+    {
+        return ActionButton::make('Изменить', '/admin/page/chat-group-page?id={id}');
     }
 
     /**
-     * @param Mailing $item
+     * @param ChatGroup $item
      *
      * @return array<string, string[]|string>
      * @see https://laravel.com/docs/validation#available-validation-rules

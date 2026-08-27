@@ -15,8 +15,10 @@ use App\MoonShine\Resources\AppealResource;
 use App\MoonShine\Resources\IgnoreListResource;
 use App\MoonShine\Resources\ClientResource;
 use App\MoonShine\Resources\GroupChatResource;
+use App\MoonShine\Resources\ChatGroupResource;
 use App\MoonShine\Resources\MailingResource;
 use App\MoonShine\Pages\MailingPage;
+use App\MoonShine\Pages\ChatGroupPage;
 use App\MoonShine\Resources\ReportsResource;
 use App\MoonShine\Resources\MessageReactionResource;
 
@@ -39,6 +41,7 @@ class MoonShineServiceProvider extends ServiceProvider
                 MoonShineUserRoleResource::class,
                 ClientResource::class,
                 GroupChatResource::class,
+                ChatGroupResource::class,
                 MailingResource::class,
                 ReportsResource::class,
                 MessageReactionResource::class,
@@ -46,6 +49,7 @@ class MoonShineServiceProvider extends ServiceProvider
             ->pages([
                 ...$config->getPages(),
                 MailingPage::class,
+                ChatGroupPage::class,
             ])
         ;
     }
