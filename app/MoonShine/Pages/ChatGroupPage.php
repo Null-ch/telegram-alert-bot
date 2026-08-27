@@ -79,7 +79,6 @@ class ChatGroupPage extends Page
 
         $chatsSelectAttributes = [
             'id' => 'chatGroupChatsSelect',
-            'class' => 'custom-select',
         ];
 
         if (!$chatGroup) {
@@ -89,9 +88,7 @@ class ChatGroupPage extends Page
         return [
             FormBuilder::make($action)
                 ->fields([
-                    Raw::make(view('admin.scripts.chat-group-js', [
-                        'selectedChatIds' => $selectedChatIds,
-                    ])->render()),
+                    Raw::make(view('admin.scripts.chat-group-js')->render()),
                     Text::make('Название', 'title')->required()->default($chatGroup->title ?? ''),
                     Select::make('Аккаунт', 'account')
                         ->options(BotName::options(withPlaceholder: !$chatGroup))
@@ -105,7 +102,8 @@ class ChatGroupPage extends Page
                     Select::make('Чаты', 'chat_ids')
                         ->options($chatOptions)
                         ->multiple()
-                        ->native()
+                        ->searchable()
+                        ->default($selectedChatIds)
                         ->customAttributes($chatsSelectAttributes),
                 ])
                 ->submit('Сохранить', ['class' => 'btn btn-primary']),

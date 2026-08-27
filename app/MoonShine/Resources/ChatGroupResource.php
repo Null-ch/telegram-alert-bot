@@ -12,9 +12,11 @@ use MoonShine\UI\Fields\Text;
 use MoonShine\UI\Fields\Select;
 use MoonShine\Laravel\Pages\Page;
 use MoonShine\Laravel\Enums\Action;
+use MoonShine\Laravel\Enums\Ability;
 use MoonShine\UI\Components\ActionButton;
 use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\Contracts\UI\ActionButtonContract;
+use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use App\MoonShine\Pages\ChatGroup\ChatGroupFormPage;
 use App\MoonShine\Pages\ChatGroup\ChatGroupIndexPage;
 use App\MoonShine\Pages\ChatGroup\ChatGroupDetailPage;
@@ -27,6 +29,11 @@ class ChatGroupResource extends ModelResource
     protected string $model = ChatGroup::class;
 
     protected string $title = 'Группы чатов';
+
+    /**
+     * @var string[]
+     */
+    protected array $with = ['groupChats'];
 
     /**
      * @return list<Page>
@@ -48,6 +55,7 @@ class ChatGroupResource extends ModelResource
                 ->options(BotName::options())
                 ->required(),
             Text::make('Название', 'title')->required(),
+            Text::make('Чаты в группе', 'chat_titles'),
         ];
     }
 
@@ -58,12 +66,18 @@ class ChatGroupResource extends ModelResource
 
     protected function formFields(): iterable
     {
-        return $this->indexFields();
+        return [
+            ID::make()->sortable(),
+            Select::make('Аккаунт', 'account')
+                ->options(BotName::options())
+                ->required(),
+            Text::make('Название', 'title')->required(),
+        ];
     }
 
     protected function activeActions(): ListOf
     {
-        return parent::activeActions()->except(Action::CREATE)->except(Action::UPDATE);
+        return parent::activeActions()->except(Action::CREATE);
     }
 
     protected function modifyCreateButton(ActionButtonContract $button): ActionButtonContract
@@ -71,9 +85,20 @@ class ChatGroupResource extends ModelResource
         return ActionButton::make('Создать', '/admin/page/chat-group-page');
     }
 
-    protected function modifyUpdateButton(ActionButtonContract $button): ActionButtonContract
+    protected function modifyEditButton(ActionButtonContract $button): ActionButtonContract
     {
-        return ActionButton::make('Изменить', '/admin/page/chat-group-page?id={id}');
+        return ActionButton::make(
+            '',
+            url: static fn (mixed $item, ?DataWrapperContract $data): string => '/admin/page/chat-group-page?id=' . $data?->getKey(),
+        )
+            ->icon('pencil')
+            ->primary()
+            ->showInLine()
+            ->canSee(
+                fn (mixed $item, ?DataWrapperContract $data): bool => $data?->getKey()
+                    && $this->hasAction(Action::UPDATE)
+                    && $this->setItem($item)->can(Ability::UPDATE)
+            );
     }
 
     /**

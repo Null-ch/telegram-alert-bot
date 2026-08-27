@@ -27,4 +27,9 @@ class ChatGroup extends Model
     {
         return $this->belongsToMany(GroupChat::class, 'chat_group_group_chat')->withTimestamps();
     }
+
+    public function getChatTitlesAttribute(): string
+    {
+        return $this->groupChats->pluck('title')->implode(', ');
+    }
 }

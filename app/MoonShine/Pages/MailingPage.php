@@ -53,20 +53,17 @@ class MailingPage extends Page
                         ),
                     Select::make('Группа чатов', 'chat_group_id')
                         ->options([])
-                        ->native()
                         ->customAttributes([
                             'id' => 'chatGroupSelect',
                             'disabled' => 'disabled',
-                            'class' => 'custom-select-single',
                         ]),
                     Select::make('Выбор чатов', 'chat_ids')
                         ->options([])
                         ->multiple()
-                        ->native()
+                        ->searchable()
                         ->customAttributes([
                             'id' => 'adminGroupChats',
                             'disabled' => 'disabled',
-                            'class' => 'custom-select',
                         ]),
                 ])
                 ->submit('Отправить', ['class' => 'btn btn-primary']),
