@@ -30,6 +30,7 @@ class MailingRepository
         $this->mailing::whereKey($id)->update([
             'sent_chats' => $sentChats,
             'failed_chats' => $failedChats,
+            'status' => Mailing::STATUS_COMPLETED,
         ]);
     }
 }

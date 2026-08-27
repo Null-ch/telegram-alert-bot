@@ -49,7 +49,7 @@ class MailingResource extends ModelResource
             Select::make('Аккаунт', 'account')
                 ->options(BotName::options(withPlaceholder: true))
                 ->required(),
-            Text::make('Чаты', 'chats_label')->badge(Color::GRAY),
+            Text::make('Чаты', 'chats_label')->badge($this->queuedAwareColor(Color::GRAY)),
             Text::make('Статус', 'errors_label')->badge($this->errorsBadgeColor()),
         ];
     }
@@ -89,7 +89,7 @@ class MailingResource extends ModelResource
 
     private function errorsBadgeColor(): \Closure
     {
-        return function (mixed $value, FieldContract $field): Color {
+        return $this->queuedAwareColor(function (mixed $value, FieldContract $field): Color {
             $item = $field->getData()?->getOriginal();
 
             if (! $item instanceof Mailing || ! $item->hasResults()) {
@@ -97,6 +97,23 @@ class MailingResource extends ModelResource
             }
 
             return $item->has_errors ? Color::ERROR : Color::SUCCESS;
+        });
+    }
+
+    /**
+     * Оборачивает цвет бейджа: пока рассылка в очереди, всегда показывает предупреждающий цвет,
+     * иначе делегирует вычисление переданному колбэку (или статичному цвету).
+     */
+    private function queuedAwareColor(Color|\Closure $fallback): \Closure
+    {
+        return function (mixed $value, FieldContract $field) use ($fallback): Color {
+            $item = $field->getData()?->getOriginal();
+
+            if ($item instanceof Mailing && $item->isQueued()) {
+                return Color::WARNING;
+            }
+
+            return $fallback instanceof \Closure ? $fallback($value, $field) : $fallback;
         };
     }
 

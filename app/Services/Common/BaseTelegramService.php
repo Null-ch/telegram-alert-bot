@@ -4,6 +4,7 @@ namespace App\Services\Common;
 
 use GuzzleHttp\Client;
 use App\DTO\MailingDTO;
+use App\Jobs\SendMailingJob;
 use App\Enums\ChatType;
 use App\DTO\ApiResponseDTO;
 use Illuminate\Support\Arr;
@@ -605,33 +606,72 @@ class BaseTelegramService implements TelegramServiceInterface
         return false;
     }
 
+    /**
+     * Создаёт запись рассылки и ставит фактическую отправку в очередь,
+     * чтобы HTTP-запрос не ждал отправки во все чаты (это может занимать
+     * долго при большом числе чатов и приводить к таймауту 504).
+     */
     public function sendMailing(Request $request): void
     {
         $tag = $request->get('account');
         $message = $request->get('message');
-        $chatIds = $request->get('chat_ids') ?? [];
+        $chatIds = array_map('intval', $request->get('chat_ids') ?? []);
         $file = $request->file('file') ?? null;
-        $storedFile = null;
-        $path = null;
+
+        $filePath = null;
+        $fileOriginalName = null;
+        $fileMimeType = null;
 
         if ($file instanceof UploadedFile) {
             $filename = uniqid() . '_' . $file->getClientOriginalName();
-            $path = $file->storeAs('temp_uploads', $filename);
-            $fullPath = Storage::disk('local')->path($path);
-
-            $storedFile = new UploadedFile(
-                $fullPath,
-                $file->getClientOriginalName(),
-                $file->getMimeType(),
-                null,
-                true
-            );
+            $filePath = $file->storeAs('temp_uploads', $filename);
+            $fileOriginalName = $file->getClientOriginalName();
+            $fileMimeType = $file->getMimeType();
         }
 
         $mailingDto = $this->baseMailingService->create(new MailingDTO(
             $message,
             $tag,
         ));
+
+        SendMailingJob::dispatch(
+            $mailingDto->id,
+            $tag,
+            $message,
+            $chatIds,
+            $filePath,
+            $fileOriginalName,
+            $fileMimeType,
+        );
+    }
+
+    /**
+     * Выполняет фактическую отправку рассылки по списку чатов. Вызывается из
+     * SendMailingJob в очереди. Ошибка в одном чате не прерывает остальные —
+     * каждый чат обрабатывается независимо и фиксируется в sent_chats/failed_chats.
+     *
+     * @param  int[]  $chatIds
+     */
+    public function processMailing(
+        int $mailingId,
+        string $tag,
+        string $message,
+        array $chatIds,
+        ?string $filePath = null,
+        ?string $fileOriginalName = null,
+        ?string $fileMimeType = null,
+    ): void {
+        $storedFile = null;
+
+        if ($filePath && Storage::disk('local')->exists($filePath)) {
+            $storedFile = new UploadedFile(
+                Storage::disk('local')->path($filePath),
+                $fileOriginalName ?? basename($filePath),
+                $fileMimeType,
+                null,
+                true
+            );
+        }
 
         $sentChats = [];
         $failedChats = [];
@@ -660,7 +700,7 @@ class BaseTelegramService implements TelegramServiceInterface
                     'chat_id' => $chatIdResolved,
                 ];
             } catch (\Throwable $e) {
-                Log::error("Рассылка #{$mailingDto->id}: не удалось отправить в чат {$chatId}: " . $e->getMessage());
+                Log::error("Рассылка #{$mailingId}: не удалось отправить в чат {$chatId}: " . $e->getMessage());
 
                 $failedChats[] = [
                     'id' => (int) $chatId,
@@ -671,10 +711,10 @@ class BaseTelegramService implements TelegramServiceInterface
             }
         }
 
-        $this->baseMailingService->recordResults($mailingDto->id, $sentChats, $failedChats);
+        $this->baseMailingService->recordResults($mailingId, $sentChats, $failedChats);
 
-        if ($path) {
-            Storage::disk('local')->delete($path);
+        if ($filePath) {
+            Storage::disk('local')->delete($filePath);
         }
     }
 

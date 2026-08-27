@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Mailing extends Model
 {
     use HasFactory, SoftDeletes;
+
+    public const STATUS_QUEUED = 'queued';
+    public const STATUS_COMPLETED = 'completed';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -17,6 +21,7 @@ class Mailing extends Model
     protected $fillable = [
         'message',
         'account',
+        'status',
         'sent_chats',
         'failed_chats',
     ];
@@ -24,10 +29,23 @@ class Mailing extends Model
     protected $table = 'mailings';
     protected $guarded = false;
 
+    /**
+     * Новая запись создаётся перед постановкой в очередь, поэтому по умолчанию — 'queued'.
+     * Существующие строки получают значение из миграции ('completed').
+     */
+    protected $attributes = [
+        'status' => self::STATUS_QUEUED,
+    ];
+
     protected $casts = [
         'sent_chats' => 'array',
         'failed_chats' => 'array',
     ];
+
+    public function isQueued(): bool
+    {
+        return $this->status === self::STATUS_QUEUED;
+    }
 
     public function hasResults(): bool
     {
@@ -41,6 +59,10 @@ class Mailing extends Model
 
     public function getChatsLabelAttribute(): string
     {
+        if ($this->isQueued()) {
+            return 'В очереди';
+        }
+
         if (! $this->hasResults()) {
             return '—';
         }
@@ -54,6 +76,10 @@ class Mailing extends Model
 
     public function getErrorsLabelAttribute(): string
     {
+        if ($this->isQueued()) {
+            return 'В очереди';
+        }
+
         if (! $this->hasResults()) {
             return '—';
         }
@@ -65,11 +91,19 @@ class Mailing extends Model
 
     public function getSentChatsHtmlAttribute(): string
     {
+        if ($this->isQueued()) {
+            return '<span class="text-secondary">Рассылка ещё выполняется…</span>';
+        }
+
         return $this->chatsToHtml($this->sent_chats ?? [], 'Нет отправленных чатов');
     }
 
     public function getFailedChatsHtmlAttribute(): string
     {
+        if ($this->isQueued()) {
+            return '<span class="text-secondary">Рассылка ещё выполняется…</span>';
+        }
+
         $chats = $this->failed_chats ?? [];
 
         if (empty($chats)) {
