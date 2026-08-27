@@ -36,6 +36,7 @@ use MoonShine\MenuManager\MenuGroup;
 use App\MoonShine\Resources\IgnoreListResource;
 use App\MoonShine\Resources\ClientResource;
 use App\MoonShine\Resources\GroupChatResource;
+use App\MoonShine\Resources\ChatGroupResource;
 use App\MoonShine\Resources\MailingResource;
 use App\MoonShine\Pages\MailingPage;
 use App\MoonShine\Resources\ReportsResource;
@@ -61,6 +62,7 @@ final class MoonShineLayout extends AppLayout
                 MenuGroup::make('Рассылки', [
                     MenuItem::make('Рассылки', MailingResource::class),
                     MenuItem::make('Групповые чаты', GroupChatResource::class),
+                    MenuItem::make('Группы чатов', ChatGroupResource::class),
                     MenuItem::make('Создать рассылку', MailingPage::class)
                 ]),
             ]),
