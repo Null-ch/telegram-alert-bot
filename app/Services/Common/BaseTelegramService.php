@@ -519,7 +519,7 @@ class BaseTelegramService implements TelegramServiceInterface
         }
     }
 
-    public function sendMessage(string $chatId, string $message, string $botName, string $parseMode = 'html'): void
+    public function sendMessage(string $chatId, string $message, string $botName, string $parseMode = 'html', ?string &$errorMessage = null): bool
     {
         try {
             if (stripos($botName, 'bot') !== false) {
@@ -528,7 +528,7 @@ class BaseTelegramService implements TelegramServiceInterface
                 $tag = Str::lower($botName);
             }
             if (empty($tag)) {
-                return;
+                return false;
             }
 
             $token = $this->getToken($tag);
@@ -540,10 +540,14 @@ class BaseTelegramService implements TelegramServiceInterface
                     'parse_mode' => $parseMode
                 ]
             ]);
-        } catch (\Exception $e) {
-            $error = $e->getMessage();
-            $errorMessage = "Chat ID: {$chatId}, botName {$botName} Ошибка: {$error}\n";
-            Log::error('Message: ' . $error . ' ' . $errorMessage);
+
+            return true;
+        } catch (\Throwable $e) {
+            $errorMessage = $e->getMessage();
+            $logMessage = "Chat ID: {$chatId}, botName {$botName} Ошибка: {$errorMessage}\n";
+            Log::error('Message: ' . $errorMessage . ' ' . $logMessage);
+
+            return false;
         }
     }
 
@@ -607,6 +611,9 @@ class BaseTelegramService implements TelegramServiceInterface
         $message = $request->get('message');
         $chatIds = $request->get('chat_ids') ?? [];
         $file = $request->file('file') ?? null;
+        $storedFile = null;
+        $path = null;
+
         if ($file instanceof UploadedFile) {
             $filename = uniqid() . '_' . $file->getClientOriginalName();
             $path = $file->storeAs('temp_uploads', $filename);
@@ -621,56 +628,95 @@ class BaseTelegramService implements TelegramServiceInterface
             );
         }
 
-        $this->baseMailingService->create(new MailingDTO(
+        $mailingDto = $this->baseMailingService->create(new MailingDTO(
             $message,
             $tag,
         ));
 
-        foreach ($chatIds as $chatId) {
-            $chatIdResolved = $this->baseGroupChatService->getGroupChatId($chatId);
+        $sentChats = [];
+        $failedChats = [];
 
-            if ($file) {
-                $this->sendDocument($chatIdResolved, $storedFile, $tag, $message);
-            } else {
-                $this->sendMessage($chatIdResolved, $message, $tag);
+        foreach ($chatIds as $chatId) {
+            $title = null;
+            $chatIdResolved = null;
+            $errorMessage = null;
+
+            try {
+                $groupChat = $this->baseGroupChatService->getGroupChatById((int) $chatId);
+                $title = $groupChat->title;
+                $chatIdResolved = $groupChat->getChatId();
+
+                $sent = $storedFile
+                    ? $this->sendDocument($chatIdResolved, $storedFile, $tag, $message, $errorMessage)
+                    : $this->sendMessage($chatIdResolved, $message, $tag, errorMessage: $errorMessage);
+
+                if (! $sent) {
+                    throw new \RuntimeException($errorMessage ?? 'Неизвестная ошибка отправки');
+                }
+
+                $sentChats[] = [
+                    'id' => (int) $chatId,
+                    'title' => $title,
+                    'chat_id' => $chatIdResolved,
+                ];
+            } catch (\Throwable $e) {
+                Log::error("Рассылка #{$mailingDto->id}: не удалось отправить в чат {$chatId}: " . $e->getMessage());
+
+                $failedChats[] = [
+                    'id' => (int) $chatId,
+                    'title' => $title,
+                    'chat_id' => $chatIdResolved,
+                    'error' => $errorMessage ?? $e->getMessage(),
+                ];
             }
         }
 
-        if ($file) {
+        $this->baseMailingService->recordResults($mailingDto->id, $sentChats, $failedChats);
+
+        if ($path) {
             Storage::disk('local')->delete($path);
         }
     }
 
-    public function sendDocument(string $chatId, UploadedFile $file, string $tag, ?string $caption = null): void
+    public function sendDocument(string $chatId, UploadedFile $file, string $tag, ?string $caption = null, ?string &$errorMessage = null): bool
     {
-        if (empty($tag)) {
-            return;
-        }
+        try {
+            if (empty($tag)) {
+                return false;
+            }
 
-        $token = $this->getToken($tag);
-        $multipart = [
-            [
-                'name'     => 'chat_id',
-                'contents' => $chatId,
-            ],
-            [
-                'name'     => 'document',
-                'contents' => fopen($file->getRealPath(), 'r'),
-                'filename' => $file->getClientOriginalName(),
-            ],
-        ];
-
-        if ($caption) {
-            $multipart[] = [
-                'name'     => 'caption',
-                'contents' => $caption,
+            $token = $this->getToken($tag);
+            $multipart = [
+                [
+                    'name'     => 'chat_id',
+                    'contents' => $chatId,
+                ],
+                [
+                    'name'     => 'document',
+                    'contents' => fopen($file->getRealPath(), 'r'),
+                    'filename' => $file->getClientOriginalName(),
+                ],
             ];
-        }
 
-        $this->client->post(env('TELEGRAM_BASE_URL') . "/bot{$token}/sendDocument", [
-            'multipart' => $multipart,
-            'parse_mode' => "markdown"
-        ]);
+            if ($caption) {
+                $multipart[] = [
+                    'name'     => 'caption',
+                    'contents' => $caption,
+                ];
+            }
+
+            $this->client->post(env('TELEGRAM_BASE_URL') . "/bot{$token}/sendDocument", [
+                'multipart' => $multipart,
+                'parse_mode' => "markdown"
+            ]);
+
+            return true;
+        } catch (\Throwable $e) {
+            $errorMessage = $e->getMessage();
+            Log::error("Chat ID: {$chatId}, botName {$tag} Ошибка отправки документа: {$errorMessage}");
+
+            return false;
+        }
     }
 
     public function handleReaction(MessageReactionDTO $dto, string $currentAccount): void

@@ -18,4 +18,13 @@ class BaseMailingService
     {
         return $this->mailingRepository->create($dto);
     }
+
+    /**
+     * @param  array<int, array{id: int, title: ?string, chat_id: ?string}>  $sentChats
+     * @param  array<int, array{id: int, title: ?string, chat_id: ?string, error: string}>  $failedChats
+     */
+    public function recordResults(int $id, array $sentChats, array $failedChats): void
+    {
+        $this->mailingRepository->recordResults($id, $sentChats, $failedChats);
+    }
 }

@@ -49,10 +49,4 @@ class BaseGroupChatService implements GroupChatServiceInterface
 
         return $groupChatDTO;
     }
-
-    public function getGroupChatId(int $id): ?string
-    {
-        $groupChatModel = $this->getGroupChatById($id);
-        return $groupChatModel->getChatId();
-    }
 }
